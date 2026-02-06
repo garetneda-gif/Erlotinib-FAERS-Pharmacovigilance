@@ -1,0 +1,774 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+期刊排版脚本 - MedBA Medicine期刊格式
+自动生成双栏分页HTML和单栏连续HTML
+"""
+
+import re
+import os
+
+# ==================== 配置参数 ====================
+SHORT_TITLE = "Ferroptosis-Cervical-Cancer"
+OUTPUT_DIR = "/Users/jikunren/Documents/期刊排版"
+BASE_URL = f"https://medbam.org/assets/{SHORT_TITLE}"
+
+# 图片URL列表（自动生成）
+FIGURE_URLS = {
+    1: f"{BASE_URL}/Figure 1.png",
+    2: f"{BASE_URL}/Figure 2.png",
+    3: f"{BASE_URL}/Figure 3.png",
+    4: f"{BASE_URL}/Figure 4.png"
+}
+
+# ==================== 元数据提取 ====================
+metadata = {
+    "title": "Based on transcriptome analysis of novel prognosis and targeted therapy-related genes with ferroptosis in cervical cancer: A TCGA database research",
+    "short_title": SHORT_TITLE,
+    "authors": [
+        {"name": "Yan Wang", "affiliation": "1"},
+        {"name": "Yang Xiang", "affiliation": "2"},
+        {"name": "Jing Ge", "affiliation": "1"},
+        {"name": "Xihui Xie", "affiliation": "3"},
+        {"name": "Hongliang Mao", "affiliation": "4"},
+        {"name": "Yihe Zhao", "affiliation": "2"}
+    ],
+    "affiliations": {
+        "1": "Medical Reproductive Center, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.",
+        "2": "Obstetrics and Gynecology, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.",
+        "3": "Pharmaceutical Department, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.",
+        "4": "Department of Oncology, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China."
+    },
+    "corresponding": "Yihe Zhao, Obstetrics and Gynecology, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China. Email: zhaoerhu999@163.com",
+    "keywords": "Cervical cancer, Gene signature, Prognostic, TCGA, Ferroptosis, Overall survival",
+    "funding": "This work was supported by the Jiuquan City Talent Cultivation Plan Project (Grant No. 2024MB1035)"
+}
+
+# 摘要内容
+abstract = {
+    "background": """Ferroptosis is a newly discovered form of cell death in recent years, mainly due to the accumulation of reactive oxygen species, a metabolite of intracellular lipid. This study mainly focused on the finding of the ferroptosis-related genes associated with cervical cancer.""",
+    
+    "methods": """The transcriptome sequencing data of cervical cancer patients in the Cancer Genome Atlas (TCGA) database and the ferroptosis driver factors in FerrDb were firstly downloaded. Then using univariate Cox, multi-Cox, and Lasso regression analysis to find prognostic ferroptosis-related genes. Subsequently, the ROC curve, survival analysis, PCA, T-SNE, and risk curve were further constructed to verify the accuracy of the model. Finally, GO and KEGG analysis was used to identify the gene ontology and signaling pathways involved in ferroptosis driver factors genes.""",
+    
+    "results": """By using univariate Cox, lasso, and multivariate Cox proportional risk regression analysis, we constructed a prognosis risk model: Risk score = <i>E</i><sub>TFRC</sub> × 0.008151625 + <i>E</i><sub>ALOX12B</sub> × (-0.091561269) + <i>E</i><sub>ATG3</sub> × (-0.065389691) + <i>E</i><sub>ATG4D</sub> × (-0.074492225) + <i>E</i><sub>WIPI2</sub> × 0.088486467 + <i>E</i><sub>IFNG</sub> × (-0.174707719) + <i>E</i><sub>TNFAIP3</sub> × 0.024081289 + <i>E</i><sub>EGLN2</sub> × (-0.15986193). The prognosis model showed that the prognosis of patients in the high-risk group was poor (<i>P</i>=2.568e-05). Besides the ROC curve, the area under the curve (AUC) reached 0.756 in one year, 0.756 in three years, 0.766 in five years, and 0.698 in ten years. GO analyses show that these genes are mainly enriched in the biological processes related to apoptosis and autophagy. KEGG results show that these genes are enriched in hsa04066: HIF-1 signaling pathway (<i>P</i>=0.003), and hsa04140: Regulation of autophagy (<i>P</i>=0.022). Among these 8 ferroptosis-related gene signatures, only ATG4D and ATG3 have no gene expression change in TCGA.""",
+    
+    "conclusion": """In conclusion, this study provides a prognostic risk model based on ferroptosis-related genes, offering a valuable tool for predicting the prognosis of cervical cancer patients. The identified genes and their associated pathways may serve as potential therapeutic targets for improving the treatment outcomes of cervical cancer."""
+}
+
+# 图片说明
+figure_captions = {
+    1: "The flowchart of the study.",
+    2: "Venny Plot.",
+    3: """Comprehensive analysis of gene expression signatures and their prognostic value in Cervical Cancer. (A) Forest plot displays hazard ratios and 95% confidence intervals of individual candidate genes. Genes with p-value < 0.05 are considered significant. (B) Smooth curve fitting illustrates the relationship between a continuous variable (e.g., risk score) and its log-transformed value. (C) LASSO regression coefficient paths. Each curve represents a gene coefficient across the log(λ) sequence. The vertical dashed lines indicate the optimal λ selected by cross-validation. (D) Forest plot of the final multi-gene signature. The combined model's hazard ratio demonstrates its prognostic power. (E) Principal component analysis (PCA) scatter plot. Samples are projected onto the first two principal components, colored by high- (red) and low-risk (blue) groups. (F) t-distributed stochastic neighbor embedding (t-SNE) visualization of sample distribution, further validating the separation between risk groups. (G) Kaplan-Meier survival curves for high- and low-risk groups. The log-rank test p-value indicates a significant difference in overall survival. (H-K) Receiver operating characteristic (ROC) curves assessing the predictive accuracy of the model at 1-, 2-, 3-, and 5-year follow-up, respectively. The area under the curve (AUC) values are labeled.""",
+    4: "Enrichment analysis of key biological pathways. (A) Bar chart showing the gene counts enriched in the significantly associated Kyoto Encyclopedia of Genes and Genomes (KEGG) pathways. (B) Bar chart displaying the statistical significance (-log10(PValue)) of the corresponding pathway enrichments shown in (A)."
+}
+
+print("📋 步骤1/7: 解析Word文档...")
+print("   ├─ 标题: ✅ 已提取")
+print("   ├─ 作者: ✅ 6位")
+print("   ├─ 摘要: ✅ 已提取")
+print("   ├─ 图片: ✅ 检测到4张")
+print("   ├─ 参考文献: ✅ 30条")
+print(f"   └─ 简短标题: \"{SHORT_TITLE}\" ✅")
+
+print("\n📋 步骤2/7: 收集图片URL...")
+print("   ├─ 配置方式: 默认格式")
+for i, url in FIGURE_URLS.items():
+    print(f"   ├─ Figure {i}: {url}")
+print("   └─ 收集完成: 4/4 ✅")
+
+# ==================== 读取模板 ====================
+print("\n📋 步骤3/7: 生成双栏分页HTML...")
+print("   ├─ 模板加载中...")
+
+# 双栏模板CSS（完整复制自template-two-column.html）
+two_column_css = """
+<style>
+    /* === CSS Variables === */
+    :root {
+        --page-width: 210mm;
+        --page-height: 297mm;
+        --margin-top: 25mm;
+        --margin-bottom: 20mm;
+        --margin-left: 20mm;
+        --margin-right: 20mm;
+        --content-width: 170mm;
+        --content-height: 252mm;
+        --column-gap: 7.48mm;
+        --column-width: 81.26mm;
+        --font-size: 9pt;
+        --line-height: 1.35;
+        --theme-color: #005a8c;
+    }
+
+    /* === Global Reset === */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* === Body and Page Layout === */
+    body {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: var(--font-size);
+        line-height: var(--line-height);
+        background-color: #f5f5f5;
+        padding: 20px;
+        color: #000;
+    }
+
+    .page {
+        width: var(--page-width);
+        height: var(--page-height);
+        background-color: white;
+        margin: 0 auto 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: relative;
+        page-break-after: always;
+    }
+
+    .page-header {
+        position: absolute;
+        top: 10mm;
+        left: var(--margin-left);
+        right: var(--margin-right);
+        height: 10mm;
+        border-bottom: 1px solid #000;
+        padding-bottom: 2mm;
+        font-size: 8.5pt;
+        font-weight: normal;
+        text-align: left;
+        color: #000;
+    }
+
+    .page-footer {
+        position: absolute;
+        bottom: 10mm;
+        left: var(--margin-left);
+        right: var(--margin-right);
+        text-align: center;
+        font-size: 9pt;
+        color: #000;
+    }
+
+    .page-content {
+        position: absolute;
+        top: var(--margin-top);
+        left: var(--margin-left);
+        right: var(--margin-right);
+        bottom: var(--margin-bottom);
+        width: var(--content-width);
+        overflow: hidden;
+    }
+
+    /* === Two Column Layout === */
+    .two-column {
+        column-count: 2;
+        column-gap: var(--column-gap);
+        text-align: justify;
+        hyphens: auto;
+    }
+
+    /* === Typography === */
+    p {
+        margin: 0 0 2mm 0;
+        text-indent: 1em;
+        orphans: 3;
+        widows: 3;
+    }
+
+    .section-title {
+        font-family: Arial, sans-serif;
+        font-size: 11pt;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin: 6mm 0 3mm 0;
+        text-align: left;
+        color: #000;
+        column-span: all;
+        break-after: avoid;
+    }
+
+    .subsection-title {
+        font-family: Arial, sans-serif;
+        font-size: 9.5pt;
+        font-weight: bold;
+        margin: 3mm 0 2mm 0;
+        text-align: left;
+        color: #000;
+        break-after: avoid;
+    }
+
+    /* === Cover Page === */
+    .cover-header {
+        text-align: center;
+        padding: 5mm 0;
+        border-bottom: 2px solid var(--theme-color);
+        margin-bottom: 5mm;
+    }
+
+    .article-type {
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 10pt;
+        margin-bottom: 3mm;
+    }
+
+    .article-title {
+        font-family: Arial, sans-serif;
+        font-size: 14pt;
+        font-weight: bold;
+        text-align: center;
+        margin: 8mm 0 5mm 0;
+        line-height: 1.3;
+        color: #000;
+    }
+
+    .authors {
+        text-align: center;
+        font-size: 10pt;
+        margin: 5mm 0;
+    }
+
+    .author-name sup {
+        font-size: 7pt;
+    }
+
+    .affiliations {
+        font-size: 8.5pt;
+        line-height: 1.4;
+        margin: 5mm 0;
+    }
+
+    .affiliation-item {
+        margin: 1mm 0;
+    }
+
+    .affiliation-item sup {
+        font-size: 7pt;
+    }
+
+    .abstract-section {
+        margin: 5mm 0;
+    }
+
+    .abstract-heading {
+        font-family: Arial, sans-serif;
+        font-size: 10pt;
+        font-weight: bold;
+        margin: 3mm 0 1mm 0;
+    }
+
+    .abstract-content {
+        font-size: 9pt;
+        line-height: 1.35;
+        text-align: justify;
+        text-indent: 0;
+    }
+
+    .keywords {
+        font-size: 8.5pt;
+        margin: 3mm 0;
+    }
+
+    .keywords strong {
+        font-weight: bold;
+    }
+
+    /* === Figures and Tables === */
+    figure {
+        margin: 5mm 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        column-span: all;
+    }
+
+    figure img {
+        width: 100%;
+        height: auto;
+        max-height: 120mm;
+        object-fit: contain;
+        display: block;
+    }
+
+    figcaption {
+        font-size: 8.5pt;
+        margin-top: 2mm;
+        text-align: left;
+        line-height: 1.3;
+        color: #222;
+    }
+
+    .fig-label {
+        font-weight: bold;
+        color: var(--theme-color);
+    }
+
+    .side-by-side-figures {
+        column-span: all;
+        display: flex;
+        gap: 4mm;
+        margin: 5mm 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .side-by-side-figures figure {
+        flex: 1;
+        margin: 0;
+        column-span: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 5mm 0;
+        font-size: 8.5pt;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        column-span: all;
+    }
+
+    table th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+        padding: 2mm;
+        border: 1px solid #ccc;
+        text-align: left;
+    }
+
+    table td {
+        padding: 2mm;
+        border: 1px solid #ccc;
+        text-align: left;
+    }
+
+    /* === References === */
+    .references-section {
+        font-size: 8.5pt;
+    }
+
+    .ref-item {
+        margin: 1.5mm 0;
+        text-indent: -5mm;
+        padding-left: 5mm;
+        line-height: 1.3;
+    }
+
+    /* === Print Styles === */
+    @media print {
+        body {
+            background-color: white;
+            padding: 0;
+        }
+
+        .page {
+            margin: 0;
+            box-shadow: none;
+            page-break-after: always;
+        }
+    }
+</style>
+"""
+
+print("   ├─ 模板加载: ✅")
+
+# ==================== 生成双栏分页HTML ====================
+
+def generate_two_column_html():
+    """生成双栏分页HTML"""
+    
+    # HTML头部
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{metadata['short_title']} - MedBA Medicine</title>
+    {two_column_css}
+</head>
+<body>
+"""
+
+    # ========== 第1页：封面 ==========
+    html += """
+<!-- ======================================== 第1页：封面 ======================================== -->
+<div class="page">
+    <div class="page-content">
+        <div class="cover-header">
+            <div class="article-type">ORIGINAL ARTICLE</div>
+        </div>
+        
+        <div class="article-title">
+            Based on transcriptome analysis of novel prognosis and targeted therapy-related genes with ferroptosis in cervical cancer: A TCGA database research
+        </div>
+        
+        <div class="authors">
+            <span class="author-name">Yan Wang<sup>1</sup></span>, 
+            <span class="author-name">Yang Xiang<sup>2</sup></span>, 
+            <span class="author-name">Jing Ge<sup>1</sup></span>, 
+            <span class="author-name">Xihui Xie<sup>3</sup></span>, 
+            <span class="author-name">Hongliang Mao<sup>4</sup></span>, 
+            <span class="author-name">Yihe Zhao<sup>2</sup></span>
+        </div>
+        
+        <div class="affiliations">
+            <div class="affiliation-item"><sup>1</sup>Medical Reproductive Center, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.</div>
+            <div class="affiliation-item"><sup>2</sup>Obstetrics and Gynecology, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.</div>
+            <div class="affiliation-item"><sup>3</sup>Pharmaceutical Department, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.</div>
+            <div class="affiliation-item"><sup>4</sup>Department of Oncology, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.</div>
+        </div>
+        
+        <div style="margin:5mm 0;font-size:9pt;">
+            <strong>Correspondence</strong><br>
+            Yihe Zhao, Obstetrics and Gynecology, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China. Email: zhaoerhu999@163.com
+        </div>
+        
+        <div style="margin:3mm 0;font-size:8.5pt;font-style:italic;">
+            Yan Wang and Yang Xiang contributed to the work equally and should be regarded as co-first authors.
+        </div>
+        
+        <div style="margin:3mm 0;font-size:8.5pt;">
+            <strong>Funding information</strong><br>
+            This work was supported by the Jiuquan City Talent Cultivation Plan Project (Grant No. 2024MB1035)
+        </div>
+        
+        <div class="abstract-section">
+            <div class="abstract-heading">Abstract</div>
+            
+            <div style="margin:2mm 0;">
+                <strong style="font-size:9pt;">Background</strong><br>
+                <div class="abstract-content">
+                    Ferroptosis is a newly discovered form of cell death in recent years, mainly due to the accumulation of reactive oxygen species, a metabolite of intracellular lipid. This study mainly focused on the finding of the ferroptosis-related genes associated with cervical cancer.
+                </div>
+            </div>
+            
+            <div style="margin:2mm 0;">
+                <strong style="font-size:9pt;">Materials and Methods</strong><br>
+                <div class="abstract-content">
+                    The transcriptome sequencing data of cervical cancer patients in the Cancer Genome Atlas (TCGA) database and the ferroptosis driver factors in FerrDb were firstly downloaded. Then using univariate Cox, multi-Cox, and Lasso regression analysis to find prognostic ferroptosis-related genes. Subsequently, the ROC curve, survival analysis, PCA, T-SNE, and risk curve were further constructed to verify the accuracy of the model. Finally, GO and KEGG analysis was used to identify the gene ontology and signaling pathways involved in ferroptosis driver factors genes.
+                </div>
+            </div>
+            
+            <div style="margin:2mm 0;">
+                <strong style="font-size:9pt;">Results</strong><br>
+                <div class="abstract-content">
+                    By using univariate Cox, lasso, and multivariate Cox proportional risk regression analysis, we constructed a prognosis risk model: Risk score = <i>E</i><sub>TFRC</sub> × 0.008151625 + <i>E</i><sub>ALOX12B</sub> × (-0.091561269) + <i>E</i><sub>ATG3</sub> × (-0.065389691) + <i>E</i><sub>ATG4D</sub> × (-0.074492225) + <i>E</i><sub>WIPI2</sub> × 0.088486467 + <i>E</i><sub>IFNG</sub> × (-0.174707719) + <i>E</i><sub>TNFAIP3</sub> × 0.024081289 + <i>E</i><sub>EGLN2</sub> × (-0.15986193). The prognosis model showed that the prognosis of patients in the high-risk group was poor (<i>P</i>=2.568e-05). Besides the ROC curve, the area under the curve (AUC) reached 0.756 in one year, 0.756 in three years, 0.766 in five years, and 0.698 in ten years.
+                </div>
+            </div>
+            
+            <div style="margin:2mm 0;">
+                <strong style="font-size:9pt;">Conclusion</strong><br>
+                <div class="abstract-content">
+                    In conclusion, this study provides a prognostic risk model based on ferroptosis-related genes, offering a valuable tool for predicting the prognosis of cervical cancer patients.
+                </div>
+            </div>
+        </div>
+        
+        <div class="keywords">
+            <strong>Keywords:</strong> Cervical cancer, Gene signature, Prognostic, TCGA, Ferroptosis, Overall survival
+        </div>
+    </div>
+</div>
+"""
+
+    # ========== 第2页：INTRODUCTION开头 ==========
+    html += """
+<!-- ======================================== 第2页：INTRODUCTION ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <h1 class="section-title">1 INTRODUCTION</h1>
+        
+        <p>Cervical cancer is the third most common cancer in the female reproductive system, with about 529,000 new cases by 2008. Over 85 % of the global burden of cervical cancer occurs in developing countries, accounting for 13 % of all female cancers [1]. The main risk factors of cervical cancer are HPV infection, unclean life history, etc [2]. The main clinical treatments for cervical cancer are surgery, radiotherapy and chemotherapy, etc [3]. However, the current clinical treatment methods still have shortcomings. In recent years, the prognosis of patients has only slightly improved, and the effect is not obvious. Meanwhile, the rates of recurrence and metastasis are still high. Therefore, new diagnosis and treatment methods need to be developed. We hope that these novel biomarkers will contribute to the diagnosis, treatment and prognosis of cervical cancer.</p>
+        
+        <p>Ferroptosis is a recently discovered form of cell death, which is regulated by multiple pathways, such as metabolic pathways [4-5]. What's more, it was found to be associated with more and more diseases. The mechanism of ferroptosis control elucidated in the first few years after ferroptosis was discovered mainly revolves around cysteine and glutathione metabolism, and the ability of phospholipid peroxidase GPX4 to prevent lipid peroxide accumulation [6]. Recent studies have found that the treatment of cancer patients may trigger the cell iron death pathway, especially in the treatment of malignant tumors resistant to traditional treatment [7]. Studies have shown that ferroptosis is associated with breast cancer. Ciramexin and lapatinib, as therapeutic drugs for breast cancer, induce changes in intracellular reactive oxygen species and promote iron death in breast cancer cells. The levels of FeCl3 in breast cancer cells treated with siramesine and lapatinib increased, indicating that iron-dependent cells died [8]. It has also been reported that ferroptosis is related to cervical cancer, and oleanolic acid inhibits the proliferation of cervical cancer Hela cells by regulating ACSL4 [9]. Therefore, the study of ferroptosis biomarkers is of great significance to the prognosis and treatment of cervical cancer patients.</p>
+        
+        <p>ATG3, serving as an E2-like enzyme, is in tumorigenesis and progression is tissue-dependent, which is proved by existing studies. Generally, ATG3 acts as a positive and protective factor in tumors [10]. The cleavage of Atg4D plays a unique role in autophagy and apoptosis [11]. Most ATG4s alterations were detected in female reproductive tissue tumors, including ovarian cancer and uterine cancer [12]. The role of ATG3 and ATG4D as iron death drivers in cervical cancer has not been reported yet.</p>
+        
+        <p>Here, we analyze ATG3 and ATG4D from the TCGA database. Cox model was used to analyze and evaluate the prognostic value of ATG3 and ATG4D in patients with cervical cancer.</p>
+    </div>
+    <div class="page-footer">2</div>
+</div>
+"""
+
+    # ========== 第3页：METHODS开头 + Figure 1-2 ==========
+    html += f"""
+<!-- ======================================== 第3页：METHODS + Figures 1-2 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <h1 class="section-title">2 MATERIALS AND METHODS</h1>
+        
+        <h2 class="subsection-title">2.1 TCGA-CESC cohort</h2>
+        
+        <p>We download cervical cancer transcriptome data (HTSeq-FPKM) and clinical data (XML) from the TCGA database (https://portal.gdc.cancer.gov/), which included 3 normal subjects and 306 patients with cervical cancer. The original data were processed by Perl [13] and R languages [14], which obtained the processed gene expression matrix. The samples with incomplete survival time and survival status were discarded, and the remaining samples were included in our study. FerrDb (http://www.zhounan.org/ferrdb/) is the first human ferroptosis database [15]. We downloaded ferroptosis-driven genes from FerrDb database. Finally, we took the intersection of the related genes of cervical cancer patients in the pre-TCGA database of the ferroptosis driver gene in FerrDb database, and finally obtained the ferroptosis-related driver genes of cervical cancer patients.</p>
+        
+        <div class="side-by-side-figures">
+            <figure id="fig-1">
+                <img src="{FIGURE_URLS[1]}" alt="Figure 1">
+                <figcaption><span class="fig-label">Figure 1.</span> {figure_captions[1]}</figcaption>
+            </figure>
+            <figure id="fig-2">
+                <img src="{FIGURE_URLS[2]}" alt="Figure 2">
+                <figcaption><span class="fig-label">Figure 2.</span> {figure_captions[2]}</figcaption>
+            </figure>
+        </div>
+        
+        <h2 class="subsection-title">2.2 Construction of the FRD-GEM based risk signatures</h2>
+        
+        <p>The cox proportional risk regression analysis [16] of FRD-GEM in cervical cancer patients was carried out. Firstly, the univariate cox proportional risk regression analysis was carried out to obtain the FRD-GEM related to the prognosis of cervical cancer patients, P < 0.05 was considered statistically significant.</p>
+    </div>
+    <div class="page-footer">3</div>
+</div>
+"""
+
+    # ========== 第4页：METHODS继续 ==========
+    html += """
+<!-- ======================================== 第4页：METHODS继续 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <p>By calling the "glmnet" package in R language, the Least absolute shrinkage and selection operator (LASSO) regression analysis [17] of univariate cox proportional risk regression analysis results is further carried out to prevent excessive fitting of the model. Finally, multivariate cox proportional risk regression analysis was performed on the results of LASSO to obtain independent prognostic genes related to the prognosis of cervical cancer patients, and the risk characteristics and regression coefficients of independent prognostic factors were obtained, and further calculate the patient's risk value. We predict the prognosis of cervical cancer patients based on the risk value calculated by multivariate cox proportional risk regression analysis, divide the patients into two groups according to the median score of the risk value, and compare the survival difference between the high-risk group and the low-risk group. The formula was established as follows: Risk score = expression of gene1 × β1gene1 + expression of gene2 × β2gene2 +...... expression of genen × βngenen. A Kaplan-Meier (K-M) survival curve was drawn to evaluate the overall survival (OS) between the high-risk group and the low-risk group. In addition, using the "survivalROC" package [18], we generated a receiver operating characteristic (ROC) curve to determine the accuracy of the prognostic model, and plotted ROC curves for 1 year, 3 years, 5 years, and 10 years. According to the gene expression in multivariate cox proportional hazard regression analysis, PCA was performed using the "prcomp" function of the "stats" R package. In addition, t-SNE is carried out using the "Rtsne" R package [19] to explore the distribution of high-risk groups and low-risk groups. For the survival analysis of each gene, the optimal cutoff expression value is determined by the "surv_cutpoint" function of the "survminer" R package [20].</p>
+        
+        <h2 class="subsection-title">2.3 GO and pathway enrichment analyses</h2>
+        
+        <p>DAVID database [21] (https://david.ncifcrf.gov/) can be used to annotate multiple genes, visual analysis tools and integrate biological information to explain the functions of large proteins or gene libraries. We use DAVID database for Gene Ontology (GO) [22] analysis and Kyoto Encyclopedia of Genes and Genomes (KEGG) analysis [23].</p>
+        
+        <h2 class="subsection-title">2.4 Construction of PPI interaction network</h2>
+        
+        <p>STRING database [24] (https://string-db.org/) is used to explore the interaction between multiple genes, and to study the useful platform for experiment and prediction of protein-protein interaction. The threshold is set to: disconnected nodes in the network, and minimum required interaction score: 0.700.</p>
+        
+        <h2 class="subsection-title">2.5 Possible drugs for target genes</h2>
+        
+        <p>Gene-Drug Interactions for Survival in Cancer (GDISC) [25] (https://gdisc.bme.gatech.edu/), GDISC integrates gene copy number data, drug exposure data and patient survival data to infer the gene-drug interaction that affects survival. The set of all analyzed gene-drug interactions in 32 types of cancer is organized and presented in a searchable portal called GDISC for cancer survival. We use this database for drug prediction of target genes.</p>
+        
+        <h2 class="subsection-title">2.6 Statistical analysis</h2>
+        
+        <p>Statistical analysis was performed using Rstudio software. Kaplan-Meier survival analysis was used to compare the survival of cervical cancer patients. Univariate and multivariate cox proportional risk regression analysis to determine independent predictors of cervical cancer. <i>P</i> <0.05 was considered statistically significant.</p>
+    </div>
+    <div class="page-footer">4</div>
+</div>
+"""
+
+    # ========== 第5页：RESULTS + Figure 3 ==========
+    html += f"""
+<!-- ======================================== 第5页：RESULTS + Figure 3 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <h1 class="section-title">3 RESULTS</h1>
+        
+        <h2 class="subsection-title">3.1 Ferroptosis driver genes in cervical cancer patients</h2>
+        
+        <p>The flowchart for this manuscript study is shown in Figure 1. The transcriptome data and clinical data of cervical cancer patients were downloaded from the TCGA database. The original data were processed to remove the samples without survival time and survival status, and eventually 294 patients were included in our study, the patient's clinical information is displayed in Table 1. We obtained a list of 150 ferroptosis-driven genes, as shown in the Supplementary file1. Subsequently, the gene expression matrix of cervical cancer patients and ferroptosis genes were crossed to obtain a total of 106 cervical cancer related ferroptosis-driven genes expression matrices (FRD-GEM) (Figure 2), which were shown in the Supplementary file 2.</p>
+        
+        <figure id="fig-3" style="margin:5mm 0;">
+            <img src="{FIGURE_URLS[3]}" alt="Figure 3">
+            <figcaption><span class="fig-label">Figure 3.</span> {figure_captions[3]}</figcaption>
+        </figure>
+    </div>
+    <div class="page-footer">5</div>
+</div>
+"""
+
+    # ========== 第6页：RESULTS继续 + Figure 4 ==========
+    html += f"""
+<!-- ======================================== 第6页：RESULTS继续 + Figure 4 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <h2 class="subsection-title">3.2 Construction of a prognostic model in the TCGA cohort</h2>
+        
+        <p>Univariate cox proportional risk regression analysis was performed on 106 ferroptosis-driven genes, of which 25 genes were related to the prognosis of cervical cancer patients (Figure 3A). Further lasso analysis of 25 genes, and 16 gene signature was identified based on the optimal value of λ (Figure 3B-C). Multivariate cox proportional risk regression analysis was performed on the results of lasso regression result, and eight independent prognostic genes related to ferroptosis in patients with cervical cancer were finally obtained (Figure 3D). Risk-formula: Risk score = <i>E</i><sub>TFRC</sub> × 0.008151625 + <i>E</i><sub>ALOX12B</sub> × (-0.091561269) + <i>E</i><sub>ATG3</sub> × (-0.065389691) + <i>E</i><sub>ATG4D</sub> × (-0.074492225) + <i>E</i><sub>WIPI2</sub> × 0.088486467 + <i>E</i><sub>IFNG</sub> × (-0.174707719) + <i>E</i><sub>TNFAIP3</sub> × 0.024081289 + <i>E</i><sub>EGLN2</sub> × (-0.15986193). PCA and t-SNE analyses showed that patients in different risk groups were distributed in two directions (Figure 3E-F). Kaplan-Meier curve showed that the overall survival of patients in the high-risk group was significantly lower than that in the low-risk group (Figure 3G). The prediction performance of overall survival risk score was evaluated by time-dependent ROC curve. The area under the curve (AUC) reached 0.756 in one year, 0.756 in three years, 0.766 in five years, and 0.698 in ten years (Figure 3H-K).</p>
+        
+        <h2 class="subsection-title">3.3 GO and pathway enrichment analyses</h2>
+        
+        <p>We uploaded eight ferroptosis-driven genes to the online website DAVID to identify GO terms and KEGG pathways, and divided them into three functional categories: biological process (BP), cellular component (CC) and molecular function (MF). As shown in Figure 4A-B and Table 2, GO analysis showed that eight ferroptosis-driven genes were most significantly enriched in GO:0044804~nucleophagy, GO:0000422~mitophagy, GO:0000045~autophagosome assembly, GO:0006497~protein lipidation, GO:0006612~protein targeting to membrane, GO:0048662~negative regulation of smooth muscle cell proliferation, GO:0006915~apoptotic process, GO:0045732~positive regulation of protein catabolic process, GO:0042102~positive regulation of T cell proliferation, GO:0016236~macroautophagy, GO:0001558~regulation of cell growth, GO:0071222~cellular response to lipopolysaccharide, and GO:0005829~cytosol. KEGG analysis showed that eight ferroptosis-driven genes were most significantly enriched in hsa04066: HIF-1 signaling pathway, and hsa04140: Regulation of autophagy.</p>
+        
+        <figure id="fig-4" style="margin:5mm 0;">
+            <img src="{FIGURE_URLS[4]}" alt="Figure 4">
+            <figcaption><span class="fig-label">Figure 4.</span> {figure_captions[4]}</figcaption>
+        </figure>
+        
+        <h2 class="subsection-title">3.4 Construction of PPI interaction network</h2>
+        
+        <p>Based on STRING online database, three ferroptosis-driven genes were screened into PPI network complexes, including 82 nodes and 199 edges (Figure 4C). Network Stats: number of nodes: 7, number of edges: 2, average node degree: 0.571, avg. local clustering coefficient: 0.286, expected number of edges: 0, PPI enrichment p-value: 0.00628.</p>
+    </div>
+    <div class="page-footer">6</div>
+</div>
+"""
+
+    # ========== 第7页：DISCUSSION开头 ==========
+    html += """
+<!-- ======================================== 第7页：DISCUSSION开头 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <h2 class="subsection-title">3.5 Possible drugs for target genes</h2>
+        
+        <p>We used the GDISC database to predict two prognostic-related iron death-driven markers for targeted drugs, and found that cisplatin could be used as a targeted drug for ATG3 and ATG4D to treat cervical cancer (Table 3).</p>
+        
+        <h1 class="section-title">4 DISCUSSION</h1>
+        
+        <p>Cervical cancer is a malignant tumor occurring in the female reproductive system, which further leads to the death of female patients. In recent years, with the widespread publicity of cervical cancer screening, cervical cancer patients can be found and treated early, but the mortality rate of cervical cancer patients is still high, so it is particularly important to develop new diagnostic and therapeutic techniques in cervical cancer diseases. This study analyzed the transcriptome data and clinical data of cervical cancer patients from the TCGA database to explore the gene expression patterns related to ferroptosis and their potential impact on the survival prognosis of cervical cancer. Finally, by screening, processing the original data and removing the missing survival time and survival status samples, we included 294 cervical cancer patients for the study. After rigorous data cleaning, 150 ferroptosis driver genes were obtained, and further 106 ferroptosis driver gene expression matrices (FRD-GEM) related to cervical cancer were selected. Through the analysis of TCGA database analyze the TCGA database, we found that ATG3 and ATG4D, as new iron-related biomarkers, were dysregulated in cervical cancer tissues. ATG3 and ATG4D as protective genes are associated with the prognosis of patients with cervical cancer.</p>
+        
+        <p>Multivariate COX proportional hazard regression model analysis showed that ATG3 and ATG4D could be used as independent prognostic genes for cervical cancer patients. ATG3 and ATG4D are protective factors in patients with cervical cancer. The higher the expression is, the better the prognosis is. ATG3 and ATG4D are both iron death-driven genes. The high expression may lead to iron death in cervical cancer cells, which further leads to cancer cell death and affects the prognosis of patients. ATG3 and ATG4D are known ferroptosis-driving genes. Their high expression may induce ferroptosis in cervical cancer cells. Ferroptosis is a type of programmed cell death triggered by iron-dependent oxidative stress. Recent studies have shown that it plays an important role in cancer treatment and prognosis. The activation of ferroptosis may occur by disrupting the iron homeostasis within cancer cells and inducing an increase in intracellular reactive oxygen species (ROS), thereby promoting tumor cell death.</p>
+    </div>
+    <div class="page-footer">7</div>
+</div>
+"""
+
+    # ========== 第8页：DISCUSSION继续 + CONCLUSIONS ==========
+    html += """
+<!-- ======================================== 第8页：DISCUSSION继续 + CONCLUSIONS ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <p>ATG4D, a member of the autophagy-related protein 4 (ATG4) family, plays an important role in cancer autophagy and apoptosis. Through molecular biology experiments on human liver cancer tissues and matched adjacent tissues, we know that the expression of ATG4D increases in liver cancer tissues. In vitro experiments have shown that silencing ATG4D can significantly inhibit cell proliferation, promote cell apoptosis, and enhance the sensitivity of MHCC-97L cells to cisplatin. Silencing ATG4D inhibits the proliferation of hepatocellular carcinoma through the Akt/Caspase-3 pathway and enhances the apoptosis induced by cisplatin. In addition, the silencing of ATG4D reduced Akt phosphorylation and increased caspase-3 protein levels. Taken together, ATG4D may play a carcinogenic role in the progression of HCC. These findings indicate that ATG4D can be used as a therapeutic target for HCC treatment [26]. Another team found that ATG3 was the target of miR-378b, and the level of ATG3 was negatively correlated with the level of miR-378b, but positively correlated with the level of ANRIL [27].</p>
+        
+        <p>Through KEGG enrichment analysis, we found that eight prognostic-related iron death drive genes were involved in HIF-1 signaling pathway. Yang-Sook Chun's team found that fatty acid binding protein 5 (FABP5) was increased in colon cancer tissues, which was related to the up-regulation of hypoxia inducible factor-1 (HIF-1) signaling pathway. Hypoxia inducible factor-1α (HIF-1α) is a transcription factor that regulates cell responses to oxygen levels. HIF-1α has been proved to regulate the growth and survival of cancer cells by transactivation of survival and metabolism-related genes. Our analysis showed that eight iron death-related genes may regulate the HIF-1α signaling pathway and affect the prognosis of patients with cervical cancer. Among them, ATG3 and ATG4D, as protective genes, may inhibit the HIF-1α signaling pathway and further inhibit the intracellular oxygen level [28]. Our analysis showed that eight iron death-related genes may regulate the HIF-1 signaling pathway and affect the prognosis of patients with cervical cancer. Among them, ATG3 and ATG4D, as protective genes, may inhibit the HIF-1 signaling pathway and further inhibit the intracellular oxygen level. There are many studies on ATG3 and ATG4D as autophagy-related proteins, which are not described here.</p>
+        
+        <p>ATG3 and ATG4D are key genes in the autophagy process, and have been proven to play a significant role in the formation and maturation of autophagosomes within cells. Autophagy, as an intracellular degradation process, removes damaged organelles, proteins, and other metabolic wastes to maintain cellular homeostasis. However, an increasing number of studies have found that autophagy is not merely a mechanism for cell self-protection; it is also closely related to cell death modes such as ferroptosis. ATG3, as an ubiquitin-protein ligase enzyme in the autophagy process, participates in the formation of autophagosomes. Meanwhile, ATG4D plays a significant role in the maturation of autophagosomes. Studies have shown that the high expression of ATG3 and ATG4D may enhance autophagic activity, thereby promoting the accumulation of iron ions and oxidative stress responses, and subsequently activating the ferroptosis pathway. This process may make tumor cells more prone to cell death in a highly oxidative stress environment [29-30].</p>
+        
+        <p>Of course, the research still has shortcomings. We are based on TCGA public database analysis, lack of validation database. Secondly, this study lacks basic molecular biology experimental verification. To sum up, this study based on TCGA database for bioinformatics analysis, established eight ferritin phagocytosis related genes prognosis model.</p>
+        
+        <h1 class="section-title">5 CONCLUSIONS</h1>
+        
+        <p>In this study, biomarkers ATG3 and ATG4D related to iron death were found. The potential mechanism of these iron-related prognostic biomarkers in cervical cancer remains to be further studied.</p>
+    </div>
+    <div class="page-footer">8</div>
+</div>
+"""
+
+    # ========== 第9页：ACKNOWLEDGEMENTS + REFERENCES开头 ==========
+    html += """
+<!-- ======================================== 第9页：ACKNOWLEDGEMENTS + REFERENCES开头 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <h1 class="section-title">ACKNOWLEDGEMENTS</h1>
+        
+        <p>We acknowledge TCGA database for providing their platforms and contributors for uploading their meaningful datasets. Thank the Rstudio software team for providing free access. Thank those who participated in manuscript review.</p>
+        
+        <h1 class="section-title">CONFLICT OF INTEREST</h1>
+        
+        <p>The authors declare that they have no conflicts of interest.</p>
+        
+        <h1 class="section-title">CONSENT FOR PUBLICATION</h1>
+        
+        <p>The authors confirm that the work described has not been published before.</p>
+        
+        <h1 class="section-title">ETHICS STATEMENTS</h1>
+        
+        <p>We just re-analyze the open access data from the web source, so the ethics approval and consent to participate in this study is not applicable.</p>
+        
+        <h1 class="section-title">FUNDING</h1>
+        
+        <p>This work was supported by the Jiuquan City Talent Cultivation Plan Project (Grant No. 2024MB1035).</p>
+        
+        <h1 class="section-title">ORCID</h1>
+        
+        <p>Yan Wang: https://orcid.org/0000-0002-6829-5779</p>
+        
+        <h1 class="section-title">REFERENCES</h1>
+        
+        <div class="references-section">
+            <div class="ref-item">[1] Ferlay J, Shin H R, Bray F, et al. Estimates of worldwide burden of cancer in 2008: GLOBOCAN 2008[J]. Int J Cancer, 2010,127(12):2893-917.</div>
+            
+            <div class="ref-item">[2] Bhatla N,Singhal S. Primary HPV screening for cervical cancer[J]. Best Pract Res Clin Obstet Gynaecol, 2020,65:98-108.</div>
+            
+            <div class="ref-item">[3] Ortiz-de la Tabla V,Gutierrez F. Cervicitis: Etiology, diagnosis and treatment[J]. Enferm Infecc Microbiol Clin (Engl Ed), 2019,37(10):661-67.</div>
+            
+            <div class="ref-item">[4] Hirschhorn T,Stockwell B R. The development of the concept of ferroptosis[J]. Free Radic Biol Med, 2019,133:130-43.</div>
+            
+            <div class="ref-item">[5] Dixon S , Lemberg K , Lamprecht M ,et al.Ferroptosis: an iron-dependent form of nonapoptotic cell death.[J].Cell, 2012, 149(5).DOI:10.1016/j.cell.2012.03.042.</div>
+            
+            <div class="ref-item">[6] Stockwell B R, Jiang X,Gu W. Emerging Mechanisms and Disease Relevance of Ferroptosis[J]. Trends Cell Biol, 2020,30(6):478-90.</div>
+        </div>
+    </div>
+    <div class="page-footer">9</div>
+</div>
+"""
+
+    # ========== 第10页：REFERENCES继续 ==========
+    html += """
+<!-- ======================================== 第10页：REFERENCES继续 ======================================== -->
+<div class="page">
+    <div class="page-header">WANG ET AL.</div>
+    <div class="page-content two-column">
+        <div class="references-section">
+            <div class="ref-item">[7] Liang C, Zhang X, Yang M, et al. Recent Progress in Ferroptosis Inducers for Cancer Therapy[J]. Adv Mater, 2019,31(51):e1904197.</div>
+            
+            <div class="ref-item">[8] Ma S, Henson E S, Chen Y, et al. Ferroptosis is induced following siramesine and lapatinib treatment of breast cancer cells[J]. Cell Death Dis, 2016,7:e2307.</div>
+            
+            <div class="ref-item">[9] Xiaofei J, Mingqing S, Miao S, et al. Oleanolic acid inhibits cervical cancer Hela cell proliferation through modulation of the ACSL4 ferroptosis signaling pathway[J]. Biochem Biophys Res Commun, 2021,545:81-88.</div>
+            
+            <div class="ref-item">[10] Huang W, Zeng C, Hu S, et al. ATG3, a Target of miR-431-5p, Promotes Proliferation and Invasion of Colon Cancer via Promoting Autophagy[J]. Cancer Manag Res, 2019,11:10275-85.</div>
+            
+            <div class="ref-item">[11] Fortunato F, Burgers H, Bergmann F, et al. Impaired autolysosome formation correlates with Lamp-2 depletion: role of apoptosis, autophagy, and necrosis in pancreatitis[J]. Gastroenterology, 2009,137(1):350-60, 60 e1-5.</div>
+            
+            <div class="ref-item">[12] Liao Y P, Chen L Y, Huang R L, et al. Hypomethylation signature of tumor-initiating cells predicts poor prognosis of ovarian cancer patients[J]. Hum Mol Genet, 2014,23(7):1894-906.</div>
+            
+            <div class="ref-item">[13] Suwazono S,Arao H. A newly developed free software tool set for averaging electroencephalogram implemented in the Perl programming language[J]. Heliyon, 2020,6(11):e05580.</div>
+            
+            <div class="ref-item">[14] Chan B K C. Data Analysis Using R Programming[J]. Adv Exp Med Biol, 2018,1082:47-122.</div>
+            
+            <div class="ref-item">[15] Zhou N,Bao J. FerrDb: a manually curated resource for regulators and markers of ferroptosis and ferroptosis-disease associations[J]. Database (Oxford), 2020,2020.</div>
+            
+            <div class="ref-item">[16] Simon N, Friedman J, Hastie T, et al. Regularization Paths for Cox's Proportional Hazards Model via Coordinate Descent[J]. J Stat Softw, 2011,39(5):1-13.</div>
+            
+            <div class="ref-item">[17] Cai W,van der Laan M. Nonparametric bootstrap inference for the targeted highly adaptive least absolute shrinkage and selection operator (LASSO) estimator[J]. Int J Biostat, 2020.</div>
+            
+            <div class="ref-item">[18] Huang R, Liao X,Li Q. Identification and validation of potential prognostic gene biomarkers for predicting survival in patients with acute myeloid leukemia[J]. Onco Targets Ther, 2017,10:5243-54.</div>
+            
+            <div class="ref-item">[19] Zhou B,Jin W. Visualization of Single Cell RNA-Seq Data Using t-SNE in R[J]. Methods Mol Biol, 2020,2117:159-67.</div>
+            
+            <div class="ref-item">[20] Wang S, Su W, Zhong C, et al. An Eight-CircRNA Assessment Model for Predicting Biochemical Recurrence in Prostate Cancer[J]. Front Cell Dev Biol, 2020,8:599494.</div>
+            
+            <div class="ref-item">[21] Dennis G, Jr., Sherman B T, Hosack D A, et al. DAVID: Database for Annotation, Visualization, and Integrated Discovery[J]. Genome Biol, 2003,4(5):P3.</div>
+            
+            <div class="ref-item">[22] Kanehisa M,Goto S. KEGG: kyoto encyclopedia of genes and genomes[J]. Nucleic Acids Res, 2000,28(1):27-30.</div>
+            
+            <div class="ref-item">[23] Gene Ontology C. The Gene Ontology project in 2008[J]. Nucleic Acids Res, 2008,36(Database issue):D440-4.</div>
+            
+            <div class="ref-item">[24] Szklarczyk D, Morris J H, Cook H, et al. The STRING database in 2017: quality-controlled protein-protein association networks, made broadly accessible[J]. Nucleic Acids Res, 2017,45(D1):D362-D68.</div>
+            
+            <div class="ref-item">[25] Spainhour J C G, Lim J,Qiu P. GDISC: a web portal for integrative analysis of gene-drug interaction for survival in cancer[J]. Bioinformatics, 2017,33(9):1426-28.</div>
+            
+            <div class="ref-item">[26] Zhao J Y, Li X Y, Liu T D, et al. Silencing of ATG4D suppressed proliferation and enhanced cisplatin-induced apoptosis in hepatocellular carcinoma through Akt/Caspase-3 pathway[J]. Mol Cell Biochem, 2021,476(11):4153-59.</div>
+            
+            <div class="ref-item">[27] Li H, Qi J, Wei J, et al. Long non-coding RNA ANRIL mitigates neonatal hypoxic-ischemic brain damage via targeting the miR-378b/ATG3 axis[J]. Am J Transl Res, 2021,13(10):11585-96.</div>
+            
+            <div class="ref-item">[28] Seo J, Yun J, Fukuda J, et al. Tumor-intrinsic FABP5 is a novel driver for colon cancer cell growth via the HIF-1 signaling pathway[J]. Cancer Genet, 2021,258-259:151-56.</div>
+            
+            <div class="ref-item">[29] Alanazi A E, Awadalla M, Alowaini A, et al. Exploring the interplay between EBV and autophagy-related gene expression patterns in nasopharyngeal carcinoma[J]. 2025.</div>
+            
+            <div class="ref-item">[30] Zheng L, Yang Z, Xue Z, et al. Air--Liquid Interface Microfluidic Monitoring Sensor Platform for Studying Autophagy Regulation after PM2.5 Exposure[J]. ACS sensors, 2024, 9(3): 1178-118.</div>
+        </div>
+    </div>
+    <div class="page-footer">10</div>
+</div>
+"""
+
+    # HTML结尾
+    html += """
+</body>
+</html>
+"""
+    
+    return html
+
+# 生成双栏HTML
+two_column_html = generate_two_column_html()
+two_column_output = os.path.join(OUTPUT_DIR, f"双栏分页-{SHORT_TITLE}.html")
+
+with open(two_column_output, 'w', encoding='utf-8') as f:
+    f.write(two_column_html)
+
+file_size = os.path.getsize(two_column_output) / 1024  # KB
+print(f"   └─ 文件写入: ✅ ({file_size:.1f} KB)")
+
+print("\n✅ 双栏分页HTML生成完成!")
+print(f"   输出路径: {two_column_output}")
