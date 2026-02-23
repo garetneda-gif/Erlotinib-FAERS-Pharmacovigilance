@@ -1,0 +1,15 @@
+=== template-two-column.html Verification ===
+Timestamp: $(date +"%Y-%m-%d %H:%M:%S")
+
+1. Check for column-count: 2
+$(grep -n "column-count: 2" /Users/jikunren/.config/opencode/skills/历史研究格式排版/assets/template-two-column.html)
+
+2. Check for column-span: all
+$(grep -n "column-span: all" /Users/jikunren/.config/opencode/skills/历史研究格式排版/assets/template-two-column.html)
+
+3. Check for Times New Roman font definition
+$(grep -n "Times New Roman" /Users/jikunren/.config/opencode/skills/历史研究格式排版/assets/template-two-column.html)
+
+4. Check for 16pt font size for h3.section-title
+$(grep -n "16pt" /Users/jikunren/.config/opencode/skills/历史研究格式排版/assets/template-two-column.html)
+
