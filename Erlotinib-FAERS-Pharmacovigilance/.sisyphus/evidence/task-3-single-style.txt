@@ -1,0 +1,19 @@
+2026-02-23 13:00:05
+10:            margin-top: 3.3cm;
+11:            margin-bottom: 2.7cm;
+12:            margin-left: 2.4cm;
+13:            margin-right: 2.3cm;
+39:            padding: 3.3cm 2.3cm 2.7cm 2.4cm; /* 模拟页边距以展示真实的视觉效果 */
+198:        <p class="no-indent">根据期刊要求，页面边距应设定为：上边距 3.3cm，下边距 2.7cm，左边距 2.4cm，右边距 2.3cm。这一比例不仅适用于纸质印刷，也为在线阅读的模拟容器提供了基础约束。在字号方面，中文传统字号系统与现代桌面出版的磅值（pt）存在固定的对应关系，例如正文所使用的“小4号”字对应 12pt，而正文大标题的“1号”字则对应 26pt。</p>
+16:        /* ② 英文字体分离（Times New Roman 仅作用于拉丁字符） */
+19:            src: local('Times New Roman'), local('TimesNewRoman');
+181:            <span class="abstract-content">本文旨在探讨如何将《历史研究》等国内权威历史学期刊的排版规范转化为前端 CSS 样式。通过分析其字号、字体栈、行距及页面设置，提出了一套兼顾学术严谨性与现代网页展示效果的实施策略。研究发现，精确的 @page 边距设定、完善的多平台中文字体降级机制，以及通过 unicode-range 强制拉丁字符使用 Times New Roman，是保证排版质量的关键。The implementation strategy of Latin text is also critical.</span>
+187:            <span class="keywords-content">历史研究排版；CSS 样式映射；字体回退；Times New Roman；单栏连续模式</span>
+27:            line-height: 17.9pt;
+47:            line-height: 17.9pt;
+202:            学术期刊的排版不仅是文字的容器，更是学术规范与严谨态度的外化。精确的行距控制（如 17.9pt）与一致的字体表现（宋体、楷体、仿宋的合理穿插），共同构建了历史学论文独特的视觉语境与阅读节奏。The aesthetic of historical scholarship is reflected in its typography.
+48:            text-indent: 2em;
+114:            padding-left: 2em;
+115:            padding-right: 2em;
+205:        <p>此外，引文排版也是历史学论文的重中之重。上文所示的独立引文，采用了楷体字体栈，并取消了首行缩进，代之以左右各 2em 的整体缩进，以此在视觉上与正文形成清晰的区别，凸显所引文献的重要性与独立性。</p>
+Task 3 completed successfully.

@@ -1,0 +1,28 @@
+🔍 校验文件: assets/template-single-column.html
+📋 规则总数: 18
+============================================================
+PASS: page_margin_top — margin-top: 3.3cm
+PASS: page_margin_bottom — margin-bottom: 2.7cm
+PASS: page_margin_left — margin-left: 2.4cm
+PASS: page_margin_right — margin-right: 2.3cm
+PASS: body_font_size_12pt — font-size: 12pt
+PASS: title_font_size_26pt — font-size: 26pt
+PASS: section_title_font_size_16pt — font-size: 16pt
+PASS: footnote_font_size_10_5pt — font-size: 10.5pt
+PASS: abstract_font_size_12pt — abstract/keywords font-size: 12pt
+PASS: body_line_height_17_9pt — line-height: 17.9pt
+PASS: footnote_line_height_14_5pt — line-height: 14.5pt
+PASS: english_font_times_new_roman — Times New Roman + @font-face
+PASS: body_font_simsun — SimSun/STSong
+FAIL: italic_ibid_et_al — ibid. 未使用 <em>（需人工复核）
+PASS: italic_overreach_article_title — 无文章标题误用斜体
+PASS: italic_needs_review_marked — 无 NEEDS_REVIEW 标记（合规，无需复核项）
+PASS: italic_ship_names — 规则已注册（内容驱动校验）
+PASS: page_layout_36_chars — 版芯 36 字（16cm）
+============================================================
+📊 校验结果:
+   通过: 17 ✅
+   失败: 1 ❌
+   总计: 18
+============================================================
+❌ 有 1 条规则失败！

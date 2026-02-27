@@ -1,0 +1,8 @@
+[Mon Feb 23 04:53:22 UTC 2026]
+total 8
+-rw-r--r--  1 jikunren  staff  632 Feb 23 12:52 SKILL.md
+drwxr-xr-x  2 jikunren  staff   64 Feb 23 12:52 assets
+drwxr-xr-x  2 jikunren  staff   64 Feb 23 12:52 references
+drwxr-xr-x  2 jikunren  staff   64 Feb 23 12:52 scripts
+2:name: 历史研究格式排版
+3:description: 将学术论文按历史研究格式规范排版为 HTML，支持单栏连续（在线预览）和双栏分页（PDF 友好）两种输出。触发词：历史排版、历史研究格式
