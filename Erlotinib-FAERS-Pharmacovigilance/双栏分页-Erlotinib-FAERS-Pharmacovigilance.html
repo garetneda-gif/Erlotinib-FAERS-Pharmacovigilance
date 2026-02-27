@@ -37,7 +37,7 @@
             background: #525659;           /* 页面外围灰色背景 */
             font-family: 'Times New Roman', Times, serif;
             font-size: 9pt;
-            line-height: 1.4;
+            line-height: 1.35;
             color: #000;
         }
 
@@ -101,15 +101,14 @@
         }
 
         /* ============ 双栏布局 ============ */
-        /* column-fill: balance（默认）：左右均衡分配，零留白；蛇形阅读顺序由CSS多列自然保证 */
+        /* column-fill: auto：左栏先填满到容器底部，右栏续排 */
         .two-column {
             column-count: 2;               /* 两栏布局 */
             column-gap: var(--column-gap);
+            column-fill: auto;             /* 顺序填充，左栏flush bottom */
             text-align: justify;           /* 两端对齐 */
-        }
-
-        .page-content.two-column {
-            column-fill: auto;
+            orphans: 1;
+            widows: 1;
         }
 
         /* ============ 跨栏元素 ============ */
@@ -243,31 +242,9 @@
             vertical-align: top;
         }
 
-        #tbl-2 th,
-        #tbl-2 td {
-            padding: 2mm 2mm;
-        }
-
-        #tbl-2 .table-caption {
-            margin-bottom: 2.4mm;
-        }
-
-        #tbl-3 table {
-            line-height: 1.42;
-        }
-
-        .page:nth-of-type(2) .page-content > p {
-            margin-bottom: 3.8mm;
-        }
-
-        .page:nth-of-type(7) .page-content > p {
-            margin-bottom: 7mm;
-        }
-
         /* ============ 参考文献样式 ============ */
         .references {
             font-size: 8pt;
-            line-height: 1.3;
         }
 
         .references div {
@@ -318,6 +295,39 @@
         }
 
         /* ============ 打印页面设置 ============ */
+        /* ============ Page 1 Introduction局部平衡双栏 ============ */
+        .page1-intro {
+            margin-top: 34.8mm;
+        }
+
+        .page1-intro .intro-columns {
+            display: flex;
+            gap: var(--column-gap);
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .page1-intro .intro-col {
+            flex: 1;
+        }
+
+        .page1-intro .intro-col.intro-left {
+            margin-top: 1.0mm;
+        }
+
+        .page1-intro .intro-col p {
+            margin: 0;
+            text-indent: 0;
+        }
+
+        .page1-intro .intro-col.intro-left p {
+            word-spacing: 0.04em;
+        }
+
+        .page1-intro .intro-col.intro-right {
+            margin-top: -3.4mm;
+        }
+
         @page {
             size: A4;
             margin: 0;
@@ -328,7 +338,7 @@
 
 <!-- ======================================== Page 1: Cover ======================================== -->
 <div class="page">
-    <div class="page-content" style="line-height:1.4;">
+    <div class="page-content" style="line-height:1.5;">
         <div id="cover">
             <div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:7pt;border-bottom:0.5pt solid #000;padding-bottom:1mm;margin-bottom:2mm;">
                 <div style="flex:1;">
@@ -337,19 +347,19 @@
                 </div>
                 <div style="font-weight:bold;">MedBA Medicine</div>
             </div>
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3.5mm;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6mm;">
                 <div style="font-size:10pt;font-weight:bold;letter-spacing:0.06em;text-transform:uppercase;margin-top:2mm;color:#000;text-decoration:underline;text-underline-offset:2mm;">ORIGINAL ARTICLE</div>
                 <img src="https://medbam.org/assets/logo.png" alt="MedBA Logo" style="height:38px;width:auto;display:block;">
             </div>
-            <div id="article-title" style="font-size:18pt;font-weight:bold;margin-bottom:6mm;line-height:1.2;text-align:left;">
+            <div id="article-title" style="font-size:18pt;font-weight:bold;margin-bottom:8mm;line-height:1.2;text-align:left;">
                 The pharmacovigilance analysis of adverse events of erlotinib based on the open access FAERS database
             </div>
-            <div id="article-authors" style="font-size:11pt;margin-bottom:8mm;font-weight:normal;text-align:left;">
+            <div id="article-authors" style="font-size:11pt;margin-bottom:10mm;font-weight:normal;text-align:left;">
                 Xiaohong Zhang<span style="vertical-align:super;font-size:0.7em;line-height:0;">b</span>,
                 Yan Wang<span style="vertical-align:super;font-size:0.7em;line-height:0;">a,*</span>
             </div>
-            <div id="front-matter" style="display:flex;margin-bottom:6mm;align-items:stretch;">
-                <div style="width:30%;font-size:8pt;line-height:1.3;padding:4mm 4mm 4mm 0;border-right:2px solid #000;">
+            <div id="front-matter" style="display:flex;margin-bottom:8mm;align-items:stretch;">
+                <div style="width:30%;font-size:8pt;line-height:1.3;padding:4mm 4mm 4mm 0;border-right:0.5pt solid #000;">
                     <p style="margin:0 0 3mm 0;text-indent:0;text-align:left;">
                         <span style="vertical-align:super;font-size:0.7em;line-height:0;">a</span>Medical Reproductive Center, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.
                     </p>
@@ -358,7 +368,7 @@
                     </p>
                     <p style="margin:0 0 3mm 0;text-indent:0;text-align:left;">
                         <span style="font-weight:bold;display:block;margin-bottom:1mm;">Correspondence</span>
-                        Yan Wang, Medical Reproductive Center, Jiuquan Hospital, Shanghai General Hospital, Jiuquan City, Gansu, China.<br>
+                        Yan Wang, Medical Reproductive Center, Jiuquan Hospital, Shanghai General Hospital, Jiuquan, Gansu, China.<br>
                         Email: yanwang2021@163.com
                     </p>
                     <p style="margin:0 0 3mm 0;text-indent:0;text-align:left;">
@@ -370,25 +380,30 @@
                         This study was performed using the FDA Adverse Event Reporting System (FAERS) source that was provided by the FDA. The information, results, or interpretation of the current study do not represent any opinion of the FDA.
                     </p>
                 </div>
-                <div id="abstract-box" style="width:70%;padding:4mm 0 4mm 4mm;position:relative;background-color:#f8f9fa;">
-                    <div style="font-size:10pt;font-weight:bold;font-variant:small-caps;letter-spacing:0.05em;margin-bottom:3mm;color:#000;">Abstract</div>
+                <div id="abstract-box" style="width:70%;padding:4mm 4mm 4mm 4mm;position:relative;background-color:#f8f9fa;">
+                    <div style="font-size:10pt;font-weight:bold;font-variant:small-caps;letter-spacing:0.2em;margin-bottom:3mm;color:#000;">Abstract</div>
                     <div id="abstract-body" style="font-size:9pt;line-height:1.3;">
                         <p style="margin:0 0 3mm 0;text-indent:0;text-align:justify;"><span style="font-weight:bold;">Background:</span> Lung cancer and pancreatic cancer are solid tumors that threaten human health and affect the human quality of life. Erlotinib is used to treat lung and pancreatic cancer, therefore larger monitoring of erlotinib&#39;s adverse events (AEs) would be more beneficial to guide patients on medication.</p>
                         <p style="margin:0 0 3mm 0;text-indent:0;text-align:justify;"><span style="font-weight:bold;">Methods:</span> The disproportionality of erlotinib-related AEs was calculated using multiple methods, including the reporting odds ratio (ROR), the proportional reporting ratio (PRR), the Bayesian confidence propagation neural network (BCPNN), and the empirical Bayes geometric mean (EBGM) algorithms, as measures of detecting erlotinib-associated AEs signals.</p>
                         <p style="margin:0 0 3mm 0;text-indent:0;text-align:justify;"><span style="font-weight:bold;">Results:</span> A total of 9,360,316 case reports participated in statistical analysis from the FAERS database, 2,870 reports of erlotinib as the &#39;primary suspected (PS)&#39; AEs were recorded, and 177 erlotinib-related ADRs at preferred terms (PTs) level were selected through disproportionality analyses. Erlotinib-induced ADRs occurrence targeted 21 organ systems. Some AEs confirmed by this study were consistent with clinical observations, such as dermatitis acneiform, and EGFR gene mutation, etc. Besides, unexpected significant AEs such as growth of eyelashes, metastases to thorax, alopecia scarring, etc. might occur, which are not labeled on the drug instruction.</p>
                         <p style="margin:0 0 3mm 0;text-indent:0;text-align:justify;"><span style="font-weight:bold;">Conclusion:</span> In this study, we found potential new and unexpected ADR signals for erlotinib, suggesting further prospective clinical studies were essential to confirm the relationship between ADRs and erlotinib. The study could provide new insight to detect signals of AEs.</p>
                         <div style="margin-top:2mm;">
-                            <span style="font-weight:bold;">Keywords:</span> erlotinib; adverse events; FAERS; lung cancer; pancreatic cancer
+                            <span style="font-weight:bold;">Keywords:</span> erlotinib, adverse events, FAERS, lung cancer, pancreatic cancer
                         </div>
                     </div>
                 </div>
             </div>
         </div><!-- /cover -->
-        <div class="two-column" style="margin-top:5mm;column-fill:balance;">
-            <h1 class="section-title" style="column-span:all;">1 INTRODUCTION</h1>
-            <p class="no-indent">Cancer is widely acknowledged as a leading cause of mortality and a significant impediment to enhancing life expectancy across all nations. According to statistical data from the World Health Organization (WHO) in 2019, cancer-related deaths rank among the top two causes in over 60% of countries [1].</p>
-            <p>Notably, lung cancer is the second most prevalent cancer, accounting for 11.4% of cancer-related deaths, while pancreatic cancer ranks 14th, comprising 2.6% of such deaths in 2020 [1]. It is important to highlight that the majority of patients diagnosed with pancreatic cancer present with the disease at an advanced and unresectable stage [2].</p>
-            <p>Erlotinib, marketed by Genentech Inc. under the brand name Tarceva&reg;, is a reversible epidermal growth factor receptor tyrosine kinase inhibitor (EGFR-TKI) that is widely utilized as a first-line therapeutic agent for advanced non-small cell lung cancer (NSCLC) and pancreatic cancer (PC) [3, 4]. It received approval from the U.S. Food and Drug Administration (FDA) in 2005 [5]. Significant advancements have been achieved in the identification and treatment of activated mutations in advanced NSCLC [6]. In the same year, the FDA also approved the combination of erlotinib with gemcitabine for the treatment of locally advanced, unresectable, or metastatic pancreatic cancer. Research has demonstrated that erlotinib can extend the survival of patients with non-small cell lung cancer who have experienced failure of first-line and second-line chemotherapy regimens [7, 8].</p>
+        <div class="page1-intro">
+            <h1 class="section-title">1 INTRODUCTION</h1>
+            <div class="intro-columns">
+                <div class="intro-col intro-left">
+                    <p class="no-indent">Cancer is widely acknowledged as a leading cause of mortality and a significant impediment to enhancing life expectancy across all nations. According to statistical data from the World Health Organization (WHO) in 2019,  cancer-related  deaths rank among the top two causes in over 60% of countries [1].</p>
+                </div>
+                <div class="intro-col intro-right">
+                    <p class="no-indent">Notably, lung cancer is the second most prevalent cancer, accounting for 11.4% of cancer-related deaths, while pancreatic cancer ranks 14th, comprising 2.6% of such deaths in 2020 [1]. It is important to highlight that the majority of patients diagnosed with pancreatic cancer present with the disease at an advanced and unresectable stage [2].</p>
+                </div>
+            </div>
         </div>
     </div>
     <div class="page-footer">https://medbam.org<span class="page-num">1</span></div>
@@ -397,18 +412,14 @@
 <!-- ======================================== Page 2: Introduction ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
-        <p class="no-indent">Moreover, a randomized phase III trial indicated that the combination of erlotinib and gemcitabine significantly improved survival outcomes in patients with advanced pancreatic cancer, although it was associated with several grade 1 and 2 adverse events. The overall survival (OS) was notably prolonged in the cohort receiving erlotinib/gemcitabine compared to those receiving gemcitabine plus placebo, with median survival times of 6.24 months versus 5.91 months, respectively (<em>P</em>=0.038) [9]. Additionally, both one-year survival rates and progression-free survival were found to be superior in the erlotinib/gemcitabine group.</p>
-        <p class="no-indent">Although erlotinib has been shown to improve the prognosis of patients with cancer, it is associated with a range of side effects. These include common adverse effects such as rash, diarrhea, loss of appetite, fatigue, and partial hair loss, as well as rare but serious effects like interstitial pneumonitis, ingrown hairs, gastrointestinal tract toxicity, skin toxicity, ocular disorders, and pulmonary toxicity [10, 11]. Given the spectrum of these adverse effects, it is imperative to conduct thorough monitoring of side effects and adverse drug reactions associated with erlotinib within a large-scale population. Notably, there exists a comprehensive database for tracking adverse drug reactions, known as the FDA Adverse Event Reporting System (FAERS). FAERS serves as a repository for the FDA&#39;s post-marketing safety surveillance data for all therapeutic drugs [12, 13]. It encompasses a vast array of adverse event reports submitted to the FDA by manufacturers in compliance with regulatory requirements, as well as reports submitted directly by consumers and healthcare professionals.</p>
+    <div class="page-content two-column" style="line-height:1.67;">
+            <p>Erlotinib, marketed by Genentech Inc. under the brand name Tarceva&reg;, is a reversible epidermal growth factor receptor tyrosine kinase inhibitor (EGFR-TKI) that is widely utilized as a first-line therapeutic agent for advanced non-small cell lung cancer (NSCLC) and pancreatic cancer (PC) [3, 4]. It received approval from the U.S. Food and Drug Administration (FDA) in 2005 [5]. Significant advancements have been achieved in the identification and treatment of activated mutations in advanced NSCLC [6]. In the same year, the FDA also approved the combination of erlotinib with gemcitabine for the treatment of locally advanced, unresectable, or metastatic pancreatic cancer. Research has demonstrated that erlotinib can extend the survival of patients with non-small cell lung cancer who have experienced failure of first-line and second-line chemotherapy regimens [7, 8]. Moreover, a randomized phase III trial indicated that the combination of erlotinib and gemcitabine significantly improved survival outcomes in patients with advanced pancreatic cancer, although it was associated with several grade 1 and 2 adverse events. The overall survival (OS) was notably prolonged in the cohort receiving erlotinib/gemcitabine compared to those receiving gemcitabine plus placebo, with median survival times of 6.24 months versus 5.91 months, respectively (<em>P</em>=0.038) [9]. Additionally, both one-year survival rates and progression-free survival were found to be superior in the erlotinib/gemcitabine group.</p>
+        <p>Although erlotinib has been shown to improve the prognosis of patients with cancer, it is associated with a range of side effects. These include common adverse effects such as rash, diarrhea, loss of appetite, fatigue, and partial hair loss, as well as rare but serious effects like interstitial pneumonitis, ingrown hairs, gastrointestinal tract toxicity, skin toxicity, ocular disorders, and pulmonary toxicity [10, 11]. Given the spectrum of these adverse effects, it is imperative to conduct thorough monitoring of side effects and adverse drug reactions associated with erlotinib within a large-scale population. Notably, there exists a comprehensive database for tracking adverse drug reactions, known as the FDA Adverse Event Reporting System (FAERS). FAERS serves as a repository for the FDA&#39;s post-marketing safety surveillance data for all therapeutic drugs [12, 13]. It encompasses a vast array of adverse event reports submitted to the FDA by manufacturers in compliance with regulatory requirements, as well as reports submitted directly by consumers and healthcare professionals.</p>
         <p>Utilizing the FAERS database is an appropriate method for monitoring and assessing the safety of pharmaceuticals. Several scholars have made significant contributions to this area of research. For example, Zhou et al. emphasized that clinicians should be vigilant regarding medical events associated with SGLT2 inhibitors, utilizing the FAERS database to evaluate their safety [14]. Additionally, Su et al. recommended enhancing the surveillance of unanticipated adverse events not specified in the prescribing information for patients with renal cell carcinoma undergoing treatment with axitinib [15].</p>
         <p>In this study, we obtained data from the FAERS spanning from the first quarter of 2005 to the fourth quarter of 2021. We analyzed the correlation between erlotinib and adverse events (AEs) in patients with NSCLC and PC, employing disproportionality analysis methods to identify signals of erlotinib-related adverse drug reactions (ADRs). An adverse event (AE) refers to an occurrence following the administration of a pharmaceutical product; however, this does not inherently imply a causal relationship. Nonetheless, statistical, biological, or clinical analyses of this association may elucidate such a causal relationship, which is then classified as an adverse drug reaction (ADR) [16]. The primary objective of this study was to identify new and unexpected ADRs that are not documented on the drug label.</p>
         <h1 class="section-title">2 METHODS AND MATERIALS</h1>
         <h2 class="subsection-title">2.1 Data Source and Preprocessing</h2>
         <p class="no-indent">Data associated with erlotinib/tarceva was acquired from the open-access database known as the FDA adverse event reporting system (FAERS). The FAERS data utilized in this study were collected and pre-processed using SAS and Navicat for MySQL software. The cleaned and standardized dataset pertaining to erlotinib/Tarceva in FAERS involved the removal of duplicate case records and the mapping of drug names to RxNorm concepts, as well as adverse drug reaction (ADR) outcomes to Medical Dictionary for Regulatory Activities (MedDRA&reg;) concepts [17]. We collected data on erlotinib-related AEs over 17-year period, spanning from the first quarter of 2005 to the last quarter of 2021 (2005Q1-2021Q4). To isolate ADRs associated with erlotinib, we utilized the Individual Safety Report (ISR) number&mdash;a unique identifier assigned to each case in the FAERS database. Duplicate entries were identified by matching ISR numbers across records. When multiple reports referenced the same ISR, only the most recent version of the case was retained to ensure data uniqueness. All AEs were statistically analyzed to extract significant ADRs, subsequently categorizing these ADR terms into preferred terms (PTs) and system organ classes (SOCs), which represent different levels of MedDRA [18].</p>
-        <p class="no-indent">In this study, erlotinib was designated as the primary suspect drug type within FAERS for the detection of ADRs. Serious clinical outcomes were classified as death (DE), disability (DS), hospitalization (HO), or life-threatening (LT). Additional indicators included in the statistical analysis were gender, age, and country.</p>
-        <h2 class="subsection-title">2.2 Statistical Methods</h2>
-        <p class="no-indent">All adverse events (AEs) have been analyzed to identify statistically significant adverse drug reactions (ADRs), which are classified as positive ADRs based on four distinct algorithms.</p>
-        <p>The four algorithms include the Reporting odds ratio (ROR) [19], proportional reporting ratio (PRR) [20], Bayesian confidence propagation neural network (BCPNN) [21], and the empirical Bayes geometric mean (EBGM), which is derived from the Gamma-Poisson Shrinker (GPS) model [22]. These methodologies are employed in drug vigilance analysis.</p>
     </div>
     <div class="page-footer">https://medbam.org<span class="page-num">2</span></div>
 </div>
@@ -416,12 +427,16 @@
 <!-- ======================================== Page 3: Methods ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.425;">
+    <div class="page-content two-column" style="line-height:1.78;">
+        <p class="no-indent">In this study, erlotinib was designated as the primary suspect drug type within FAERS for the detection of ADRs. Serious clinical outcomes were classified as death (DE), disability (DS), hospitalization (HO), or life-threatening (LT). Additional indicators included in the statistical analysis were gender, age, and country.</p>
+        <h2 class="subsection-title">2.2 Statistical Methods</h2>
+        <p class="no-indent">All adverse events (AEs) have been analyzed to identify statistically significant adverse drug reactions (ADRs), which are classified as positive ADRs based on four distinct algorithms.</p>
+        <p>The four algorithms include the Reporting odds ratio (ROR) [19], proportional reporting ratio (PRR) [20], Bayesian confidence propagation neural network (BCPNN) [21], and the empirical Bayes geometric mean (EBGM), which is derived from the Gamma-Poisson Shrinker (GPS) model [22]. These methodologies are employed in drug vigilance analysis.</p>
         <p>The specific formulas of the ROR, PRR, BCPNN, and EBGM algorithms are as follows (Please refer to Table 1 for relevant information prior to reviewing the formulas):</p>
 
         <!-- Table 1 -->
         <div class="table-wrapper" id="tbl-1" style="column-span:none;width:100%;margin:5mm 0 6mm;">
-            <div class="table-caption"><span class="tbl-label">Table 1.</span> Two-dimensional matrix.</div>
+            <div class="table-caption"><span class="tbl-label">Table 1</span> Two-dimensional matrix.</div>
             <table style="width:100%;">
                 <thead>
                     <tr>
@@ -461,7 +476,7 @@
         <p style="margin-top:3mm;">The effective and favorable ADR results must concurrently satisfy the screening criteria outlined by the aforementioned four methods. All data processing and statistical analyses related to Erlotinib have been conducted utilizing SAS, Navicat for MySQL, WPS Excel, and R software.</p>
         <h1 class="section-title">3 RESULTS</h1>
         <h2 class="subsection-title">3.1 Descriptive Results</h2>
-        <p class="no-indent">During the study period spanning from the first quarter of 2005 to the fourth quarter of 2021, a total of 9,360,316 case reports were collected from the FDA Adverse Event Reporting System (FAERS). Among these, after removing duplicate entries and applying four distinct algorithms, 2,870 adverse events (AEs, primarily identified by ROR and PRR) and 177 adverse drug reactions (ADRs, satisfying all four methods) related to erlotinib as the primary suspected drug were identified from 26,957 case reports. The specific clinical characteristics of events associated with erlotinib are detailed in Table 2.</p>
+        <p class="no-indent">During the study period spanning from the first quarter of 2005 to the fourth quarter of 2021, a total of 9,360,316 case reports were collected from the FDA Adverse Event Reporting System (FAERS). Among these, after removing duplicate entries and applying four distinct algorithms, 2,870 adverse events (AEs, primarily identified by ROR and PRR) and 177 adverse drug reactions (ADRs, satisfying all four methods) related to erlotinib as the primary suspected drug were identified from 26,957 case reports. The specific clinical characteristics of events associated with erlotinib are detailed in Table 2</p>
         <p>In the analysis of case reports encompassing all AEs, the gender distribution revealed that females accounted for approximately 38.11% of the total case reports. Regarding age demographics, individuals aged 60 to 69 exhibited a higher incidence of AEs compared to other age groups, representing 6.56% (2,325) of the reports with known age information. Furthermore, the leading countries in the utilization of erlotinib included the United States (18,124 reports, 67.23%), Japan (422 reports, 1.57%), China (334 reports, 1.24%), the United Kingdom (264 reports, 0.98%), and France (264 reports, 0.98%). The most severe outcome associated with AEs was death, accounting for 13,785 reports (38.89%), in contrast to other outcomes such as hospitalization (3,588 reports, 10.12%), life-threatening conditions (253 reports, 0.71%), and disability (118 reports, 0.31%).</p>
     </div>
     <div class="page-footer">https://medbam.org<span class="page-num">3</span></div>
@@ -470,9 +485,9 @@
 <!-- ======================================== Page 4: Results + Table 2 ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
-        <div class="table-wrapper" id="tbl-2" style="column-span:none;width:100%;margin:5mm 0 7.2mm;">
-            <div class="table-caption"><span class="tbl-label">Table 2.</span> The features of reports associated with erlotinib from the 2005 Q1 to 2021 Q4.</div>
+    <div class="page-content two-column" style="line-height:1.80;">
+        <div class="table-wrapper" id="tbl-2" style="column-span:none;width:100%;margin:5mm 0 6mm;">
+            <div class="table-caption"><span class="tbl-label">Table 2</span> The features of reports associated with erlotinib from the 2005 Q1 to 2021 Q4.</div>
             <table style="width:100%;">
                 <thead>
                     <tr><th></th><th style="text-align:center;">Counts</th><th style="text-align:center;">Percentages (%)</th></tr>
@@ -510,6 +525,12 @@
             <div style="font-size:7.5pt;margin-top:1.5mm;line-height:1.25;">* The asterisk (*) indicates categories beyond the biological sexes of male and female, including other self-defined genders or unspecified/unknown gender entries.</div>
         </div>
 
+        <h2 class="subsection-title">3.2 Signals Detection Associated with Erlotinib at the SOC Level</h2>
+        <p class="no-indent">As illustrated in Table 3, the three most prevalent adverse events at the System Organ Class (SOC) level include general disorders and administration site conditions (case reports: 13,114; ROR=16.46; PRR=8.94; IC<sub>025</sub>=3.06; EBGM<sub>05</sub>=8.53), skin and subcutaneous tissue disorders (case reports: 6,839; ROR=11.41; PRR=8.77; IC<sub>025</sub>=3.01; EBGM<sub>05</sub>=8.34), and gastrointestinal disorders (case reports: 3,205; ROR=4.78; PRR=4.33; IC<sub>025</sub>=1.98; EBGM<sub>05</sub>=4.14). A further analysis of signal strength indicates that the leading three SOC categories of adverse events are congenital, familial, and genetic disorders (ROR=82.3), reproductive system and breast disorders (ROR=24.23), and nervous system disorders (ROR=11.49), all of which are also referenced in the erlotinib manual.</p>
+        <p>Additionally, there are SOC terms not included in the erlotinib label, such as cardiac disorders (case reports: 177; ROR=5.83; PRR=5.8; IC<sub>025</sub>=2.02; EBGM<sub>05</sub>=4.93), vascular disorders (case reports: 138; ROR=4.71; PRR=4.69; IC<sub>025</sub>=1.66; EBGM<sub>05</sub>=3.92), surgical and medical procedures (case reports: 38; ROR=3.97; PRR=3.96; IC<sub>025</sub>=0.94; EBGM<sub>05</sub>=2.85), reproductive system and breast disorders (case reports: 20; ROR=24.23; PRR=24.21; IC<sub>025</sub>=3.07; EBGM<sub>05</sub>=14.42), and injury, poisoning, and procedural complications (case reports: 16; ROR=9.18; PRR=9.17; IC<sub>025</sub>=1.61; EBGM<sub>05</sub>=5.45).</p>
+        <h2 class="subsection-title">3.3 Signals Detection Associated with Erlotinib at the PT Level</h2>
+        <p class="no-indent">In Table 4, the adverse events (AEs) at the Preferred Term (PT) level account for 177 PTs associated with erlotinib, all of which simultaneously met the criteria of four positive signal screening methods. The five most frequently reported PTs, ranked by case reports, are as follows: death (11,753 cases), rash (4,061 cases), diarrhoea (2,732 cases), disease progression (898 cases), and decreased appetite (724 cases). These findings are consistent with common clinical AEs and align with those documented in the erlotinib drug label (Table 4).</p>
+        <p>Additionally, the top five PTs ranked by the IC<sub>025</sub> value include dermatitis acneiform (282 cases, IC<sub>025</sub> = 5.16), EGFR gene mutation (33 cases, IC<sub>025</sub> = 4.85), non-small cell lung cancer metastatic (42 cases, IC<sub>025</sub> = 4.73), growth of eyelashes (54 cases, IC<sub>025</sub> = 4.58), and metastases to thorax (18 cases, IC<sub>025</sub> = 4.41) (see supplementary Table S1). Moreover, several unexpected significant AEs ranked by IC<sub>025</sub> at the PT level are not included in the erlotinib label, including alopecia scarring (12 cases), metastases to the neck (19 cases), and nail bed inflammation (11 cases), among others. Additional unexpected and newly identified significant AEs are presented in supplementary Table S1.</p>
     </div>
     <div class="page-footer">https://medbam.org<span class="page-num">4</span></div>
 </div>
@@ -518,11 +539,11 @@
 <!-- ======================================== Page 5: Table 3 ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
+    <div class="page-content two-column" style="line-height:1.35;">
 
 <div class="table-wrapper" id="tbl-3">
-            <div class="table-caption"><span class="tbl-label">Table 3.</span> Signal strength of AEs of erlotinib at the System Organ Class (SOC) level in FAERS source (Terms marked with <sup>#</sup> indicate that AEs are in erlotinib&#39;s label).</div>
-            <table style="font-size:7.3pt;line-height:1.42;">
+            <div class="table-caption"><span class="tbl-label">Table 3</span> Signal strength of AEs of erlotinib at the System Organ Class (SOC) level in FAERS source (Terms marked with <sup>#</sup> indicate that AEs are in erlotinib&#39;s label).</div>
+            <table style="font-size:7.3pt;line-height:1.58;">
                 <thead><tr><th>SOC</th><th style="text-align:center;">SOC Code</th><th style="text-align:center;">Case Reports</th><th style="text-align:center;">ROR (95% CI)</th><th style="text-align:center;">PRR (95% CI)</th><th style="text-align:center;">&chi;<sup>2</sup></th><th style="text-align:center;">IC (IC025)</th><th style="text-align:center;">EBGM (EBGM05)</th></tr></thead>
                 <tbody>
 <tr><td>General disorders and administration site conditions<sup>#</sup></td><td style="text-align:center;">10018065</td><td style="text-align:center;">13,114</td><td style="text-align:center;">16.46 (16.07-16.86)</td><td style="text-align:center;">8.94 (8.83-9.05)</td><td style="text-align:center;">95439.10</td><td style="text-align:center;">3.13 (3.06)</td><td style="text-align:center;">8.74 (8.53)</td></tr>
@@ -552,12 +573,6 @@
 </tbody>
             </table>
         </div>
-        <h2 class="subsection-title">3.2 Signals Detection Associated with Erlotinib at the SOC Level</h2>
-        <p class="no-indent">As illustrated in Table 3, the three most prevalent adverse events at the System Organ Class (SOC) level include general disorders and administration site conditions (case reports: 13,114; ROR=16.46; PRR=8.94; IC<sub>025</sub>=3.06; EBGM<sub>05</sub>=8.53), skin and subcutaneous tissue disorders (case reports: 6,839; ROR=11.41; PRR=8.77; IC<sub>025</sub>=3.01; EBGM<sub>05</sub>=8.34), and gastrointestinal disorders (case reports: 3,205; ROR=4.78; PRR=4.33; IC<sub>025</sub>=1.98; EBGM<sub>05</sub>=4.14). A further analysis of signal strength indicates that the leading three SOC categories of adverse events are congenital, familial, and genetic disorders (ROR=82.3), reproductive system and breast disorders (ROR=24.23), and nervous system disorders (ROR=11.49), all of which are also referenced in the erlotinib manual.</p>
-        <p>Additionally, there are SOC terms not included in the erlotinib label, such as cardiac disorders (case reports: 177; ROR=5.83; PRR=5.8; IC<sub>025</sub>=2.02; EBGM<sub>05</sub>=4.93), vascular disorders (case reports: 138; ROR=4.71; PRR=4.69; IC<sub>025</sub>=1.66; EBGM<sub>05</sub>=3.92), surgical and medical procedures (case reports: 38; ROR=3.97; PRR=3.96; IC<sub>025</sub>=0.94; EBGM<sub>05</sub>=2.85), reproductive system and breast disorders (case reports: 20; ROR=24.23; PRR=24.21; IC<sub>025</sub>=3.07; EBGM<sub>05</sub>=14.42), and injury, poisoning, and procedural complications (case reports: 16; ROR=9.18; PRR=9.17; IC<sub>025</sub>=1.61; EBGM<sub>05</sub>=5.45).</p>
-        <h2 class="subsection-title">3.3 Signals Detection Associated with Erlotinib at the PT Level</h2>
-        <p class="no-indent">In Table 4, the adverse events (AEs) at the Preferred Term (PT) level account for 177 PTs associated with erlotinib, all of which simultaneously met the criteria of four positive signal screening methods. The five most frequently reported PTs, ranked by case reports, are as follows: death (11,753 cases), rash (4,061 cases), diarrhoea (2,732 cases), disease progression (898 cases), and decreased appetite (724 cases). These findings are consistent with common clinical AEs and align with those documented in the erlotinib drug label (Table 4).</p>
-        <p>Additionally, the top five PTs ranked by the IC<sub>025</sub> value include dermatitis acneiform (282 cases, IC<sub>025</sub> = 5.16), EGFR gene mutation (33 cases, IC<sub>025</sub> = 4.85), non-small cell lung cancer metastatic (42 cases, IC<sub>025</sub> = 4.73), growth of eyelashes (54 cases, IC<sub>025</sub> = 4.58), and metastases to thorax (18 cases, IC<sub>025</sub> = 4.41) (see supplementary Table S1). Moreover, several unexpected significant AEs ranked by IC<sub>025</sub> at the PT level are not included in the erlotinib label, including alopecia scarring (12 cases), metastases to the neck (19 cases), and nail bed inflammation (11 cases), among others. Additional unexpected and newly identified significant AEs are presented in supplementary Table S1.</p>
 
     </div>
     <div class="page-footer">https://medbam.org<span class="page-num">5</span></div>
@@ -566,7 +581,7 @@
 <!-- ======================================== Page 6: Table 4 Part 1 (rows 1-20) ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
+    <div class="page-content two-column" style="line-height:1.35;">
 <div class="table-wrapper" id="tbl-4" style="margin:5mm 0 2mm;">
             <div class="table-caption"><span class="tbl-label">Table 4.</span> The top 40 signal strength of AEs of erlotinib at preferred terms (PTs) level in FAERS source (Terms marked with <sup>#</sup> indicate that AEs are in erlotinib&#39;s label).</div>
             <table style="font-size:7pt;line-height:1.3;border-bottom:0.75pt solid #000;">
@@ -609,11 +624,11 @@
 <!-- ======================================== Page 7: Table 4 Part 2 (rows 21-39) + Discussion ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
-        <div class="table-wrapper" style="margin:0 0 3mm;">
-            <div class="table-caption"><span class="tbl-label">Table 4.</span> (Continued)</div>
-            <table style="font-size:7pt;line-height:1.3;border-top:1.5pt solid #000;">
-                <thead><tr><th>AEs</th><th>SOC</th><th style="text-align:center;">Case Reports</th><th style="text-align:center;">ROR (95% CI)</th><th style="text-align:center;">PRR (95% CI)</th><th style="text-align:center;">IC (IC025)</th><th style="text-align:center;">EBGM (EBGM05)</th></tr></thead>
+    <div class="page-content two-column" style="line-height:1.9;">
+        <div class="table-wrapper" style="margin:0 0 14mm;">
+            <div class="table-caption"><span class="tbl-label">Table 4</span> (Continued)</div>
+            <table style="font-size:7pt;line-height:1.7;border-top:1.5pt solid #000;">
+                <thead><tr><th style="padding:3px 2px;">AEs</th><th style="padding:3px 2px;">SOC</th><th style="text-align:center;padding:3px 2px;">Case Reports</th><th style="text-align:center;padding:3px 2px;">ROR (95% CI)</th><th style="text-align:center;padding:3px 2px;">PRR (95% CI)</th><th style="text-align:center;padding:3px 2px;">IC (IC025)</th><th style="text-align:center;padding:3px 2px;">EBGM (EBGM05)</th></tr></thead>
                 <tbody>
 <tr><td>Hair growth abnormal</td><td style="font-size:6.5pt;">Skin and subcutaneous tissue disorders</td><td style="text-align:center;">96</td><td style="text-align:center;">10.73 (8.75-13.15)</td><td style="text-align:center;">10.69 (8.73-13.09)</td><td style="text-align:center;">3.38 (2.71)</td><td style="text-align:center;">10.4 (8.49)</td></tr>
 <tr><td>Non-small cell lung cancer<sup>#</sup></td><td style="font-size:6.5pt;">Respiratory, thoracic and mediastinal disorders</td><td style="text-align:center;">89</td><td style="text-align:center;">24.77 (19.97-30.72)</td><td style="text-align:center;">24.69 (19.92-30.6)</td><td style="text-align:center;">4.53 (3.82)</td><td style="text-align:center;">23.11 (18.64)</td></tr>
@@ -625,13 +640,11 @@
                 </tbody>
             </table>
         </div>
-        <h1 class="section-title">4 DISCUSSION</h1>
-        <p class="no-indent">Cancer is a complex and challenging disease characterized by limited treatment options, particularly in pharmacotherapy. The therapeutic efficacy of the same drug can vary significantly among individuals. Consequently, it is both necessary and meaningful to monitor the adverse drug reactions (ADRs) associated with these treatments, as they may provide critical insights into patient prognoses following drug administration. Skin-related disorders (e.g., rash), liver dysfunction, and diarrhea are well-documented as major ADRs in patients undergoing treatment with epidermal growth factor receptor (EGFR) kinase inhibitors, such as erlotinib and gefitinib [23-25].</p>
-        <p>In this study, we observed that certain ADRs were consistent with those listed in the package insert for erlotinib, while others were not. Data mining of the FDA Adverse Event Reporting System (FAERS) revealed that the most frequently reported and significant signals of ADRs at the System Organ Class (SOC) level included congenital, familial, and genetic disorders (ROR=82.3, PRR=82.2, IC<sub>025</sub>=4.85, EBGM<sub>05</sub>=45.57) as well as reproductive system and breast disorders (ROR=24.23, PRR=24.21, IC<sub>025</sub>=3.07, EBGM<sub>05</sub>=14.42). Notably, significant ADRs were primarily associated with EGFR gene mutations, pelvic metastases, and breast metastases.</p>
-        <p style="break-inside: avoid;">The combination of erlotinib and bevacizumab has been shown to enhance overall survival (OS) in patients with EGFR gene mutations, albeit with accompanying adverse events such as rash and diarrhea [26]. Furthermore, early exposure to erlotinib may be linked to the development of adverse events, while increasing exposure does not appear to affect outcomes in patients with EGFR gene mutations [27]. The 1-year progression-free survival (PFS) rate and median PFS for concurrent erlotinib plus thoracic radiotherapy are reported to be superior to those observed with erlotinib monotherapy [28].</p>
-        <p style="break-inside: avoid;">In our analysis of AEs identified at the PT level, we observed that the top three AEs ranked by case reports were death, rash, and diarrhea. The elevated number of reported deaths may be attributed to the role of erlotinib as a primary suspect, secondary suspect, or in conjunction with other concomitant and interacting medications in this statistical analysis. Furthermore, Suleiman&#39;s team developed models for erlotinib-related AEs, specifically rash and diarrhea, to elucidate insights into erlotinib toxicity. Their findings indicated that the occurrence of rash or diarrhea is prevalent during the early stages of treatment, with a positive correlation between rash incidence and erlotinib exposure [29].</p>
-        <p>Additionally, the adverse events associated with erlotinib, primarily skin rash, paronychia, and gastrointestinal toxicities, demonstrate a lower incidence rate compared to those associated with dacomitinib [30]. Notably, we identified a unique adverse event, superior vena caval occlusion, which is not mapped within the Medical Dictionary for Regulatory Activities (MedDRA) (see supplementary Table S1). In fact, we detected numerous ADRs that are not included in the erlotinib labeling. In summary, greater attention should be directed toward these ADRs that are not explicitly noted on drug packaging when administering erlotinib in the future, and ongoing monitoring of the health status of patients using this medication is imperative.</p>
-        <p>The clinical implications of the observed ADRs are significant, particularly in the context of EGFR signaling pathways. EGFR is known to play a crucial role in cell proliferation, differentiation, and survival [31]. The inhibition of this pathway by agents like erlotinib can lead to unintended consequences, such as skin toxicity and gastrointestinal disturbances, which may arise from the disruption of normal epithelial cell turnover [32]. The skin and gastrointestinal tract are particularly sensitive to EGFR inhibition due to their rapid cellular turnover, making these tissues more susceptible to drug-related toxicities.</p>
+        <h1 class="section-title" style="margin-top:6mm;">4 DISCUSSION</h1>
+        <p class="no-indent" style="margin-bottom:4mm;">Cancer is a complex and challenging disease characterized by limited treatment options, particularly in pharmacotherapy. The therapeutic efficacy of the same drug can vary significantly among individuals. Consequently, it is both necessary and meaningful to monitor the adverse drug reactions (ADRs) associated with these treatments, as they may provide critical insights into patient prognoses following drug administration. Skin-related disorders (e.g., rash), liver dysfunction, and diarrhea are well-documented as major ADRs in patients undergoing treatment with epidermal growth factor receptor (EGFR) kinase inhibitors, such as erlotinib and gefitinib [23-25].</p>
+        <p style="margin-bottom:4mm;">In this study, we observed that certain ADRs were consistent with those listed in the package insert for erlotinib, while others were not. Data mining of the FDA Adverse Event Reporting System (FAERS) revealed that the most frequently reported and significant signals of ADRs at the System Organ Class (SOC) level included congenital, familial, and genetic disorders (ROR=82.3, PRR=82.2, IC<sub>025</sub>=4.85, EBGM<sub>05</sub>=45.57) as well as reproductive system and breast disorders (ROR=24.23, PRR=24.21, IC<sub>025</sub>=3.07, EBGM<sub>05</sub>=14.42). Notably, significant ADRs were primarily associated with EGFR gene mutations, pelvic metastases, and breast metastases.</p>
+        <p style="margin-bottom:4mm;">The combination of erlotinib and bevacizumab has been shown to enhance overall survival (OS) in patients with EGFR gene mutations, albeit with accompanying adverse events such as rash and diarrhea [26]. Furthermore, early exposure to erlotinib may be linked to the development of adverse events, while increasing exposure does not appear to affect outcomes in patients with EGFR gene mutations [27]. The 1-year progression-free survival (PFS) rate and median PFS for concurrent erlotinib plus thoracic radiotherapy are reported to be superior to those observed with erlotinib monotherapy [28].</p>
+        <p>In our analysis of AEs identified at the PT level, we observed that the top three AEs ranked by case reports were death, rash, and diarrhea. The elevated number of reported deaths may be attributed to the role of erlotinib as a primary suspect, secondary suspect, or in conjunction with other concomitant and interacting medications in this statistical analysis. Furthermore, Suleiman&#39;s team developed models for erlotinib-related AEs, specifically rash and diarrhea, to elucidate insights into erlotinib toxicity. Their findings indicated that the occurrence of rash or diarrhea is prevalent during the early stages of treatment, with a positive correlation between rash incidence and erlotinib exposure [29].</p>
     </div>
     <div class="page-footer">https://medbam.org<span class="page-num">7</span></div>
 </div>
@@ -639,11 +652,13 @@
 <!-- ======================================== Page 8: Discussion cont. ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
+    <div class="page-content two-column" style="line-height:2.01;">
+        <p class="no-indent">Additionally, the adverse events associated with erlotinib, primarily skin rash, paronychia, and gastrointestinal toxicities, demonstrate a lower incidence rate compared to those associated with dacomitinib [30]. Notably, we identified a unique adverse event, superior vena caval occlusion, which is not mapped within the Medical Dictionary for Regulatory Activities (MedDRA) (see supplementary Table S1). In fact, we detected numerous ADRs that are not included in the erlotinib labeling. In summary, greater attention should be directed toward these ADRs that are not explicitly noted on drug packaging when administering erlotinib in the future, and ongoing monitoring of the health status of patients using this medication is imperative.</p>
+        <p>The clinical implications of the observed ADRs are significant, particularly in the context of EGFR signaling pathways. EGFR is known to play a crucial role in cell proliferation, differentiation, and survival [31]. The inhibition of this pathway by agents like erlotinib can lead to unintended consequences, such as skin toxicity and gastrointestinal disturbances, which may arise from the disruption of normal epithelial cell turnover [32]. The skin and gastrointestinal tract are particularly sensitive to EGFR inhibition due to their rapid cellular turnover, making these tissues more susceptible to drug-related toxicities.</p>
         <p>Biologically, the presence of specific EGFR mutations may predispose patients to unique toxicity profiles [33]. For instance, the correlation between EGFR mutations and specific ADRs suggests that genetic profiling could inform personalized treatment strategies, allowing clinicians to better anticipate and manage potential toxicities. This highlights the importance of pharmacogenomic testing in optimizing therapy with EGFR inhibitors.</p>
         <p>Moreover, the identification of unique ADRs, such as superior vena caval occlusion, underscores the need for a more comprehensive understanding of the drug&#39;s pharmacodynamics and pharmacokinetics. The mechanisms underlying such rare but serious events may involve complex interactions between erlotinib and other medications or underlying patient conditions, warranting further exploration.</p>
-        <p style="break-inside: avoid;">The analysis of open-access comprehensive data sources is a viable method for detecting potential signals, with the FAERS database recognized as one of the largest and most detailed sources of pharmacovigilance data. However, this scientific research is not without limitations. On one hand, the FAERS database contains instances of partially missing information and duplicate entries. We manually verified and eliminated some of these duplications. Moreover, the values derived from the four algorithms&mdash;ROR, PRR, BCPNN, and EBGM&mdash;do not imply a causal risk of AEs in clinical practice; rather, they indicate correlation and association.</p>
-        <p style="break-inside: avoid;">The FDA does not mandate establishing a definitive causal relationship between drugs and events. Consequently, the values generated by the four methods we employed serve only as safety signals rather than indicators of actual risk. On the other hand, FAERS post-marketing data cannot accurately determine the true incidence of an AE. Additionally, many potential complications, such as malignancy and disease progression, may occur independently over time, warranting further investigation, particularly when the number of cases involved is relatively small. Despite these limitations, the analytical results can provide valuable references for healthcare professionals to closely monitor patients administered these agents.</p>
+        <p>The analysis of open-access comprehensive data sources is a viable method for detecting potential signals, with the FAERS database recognized as one of the largest and most detailed sources of pharmacovigilance data. However, this scientific research is not without limitations. On one hand, the FAERS database contains instances of partially missing information and duplicate entries. We manually verified and eliminated some of these duplications. Moreover, the values derived from the four algorithms&mdash;ROR, PRR, BCPNN, and EBGM&mdash;do not imply a causal risk of AEs in clinical practice; rather, they indicate correlation and association.</p>
+        <p>The FDA does not mandate establishing a definitive causal relationship between drugs and events. Consequently, the values generated by the four methods we employed serve only as safety signals rather than indicators of actual risk. On the other hand, FAERS post-marketing data cannot accurately determine the true incidence of an AE. Additionally, many potential complications, such as malignancy and disease progression, may occur independently over time, warranting further investigation, particularly when the number of cases involved is relatively small. Despite these limitations, the analytical results can provide valuable references for healthcare professionals to closely monitor patients administered these agents.</p>
 <h1 class="section-title">5 CONCLUSION</h1>
         <p class="no-indent">In this study, potential new and unexpected adverse drug reaction (ADR) signals associated with erlotinib were identified, underscoring the necessity of further prospective clinical research to confirm their causal relationship. These findings offer valuable insights for enhancing adverse event (AE) signal detection in pharmacovigilance practice.</p>
 
@@ -657,7 +672,7 @@
 <!-- ======================================== Page 9: References ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
+    <div class="page-content two-column" style="line-height:1.71;">
         <h2 class="subsection-title">DATA SHARING STATEMENT</h2>
         <p class="no-indent">The data included in this study are available on the request from the corresponding author or the first author.</p>
 
@@ -681,7 +696,7 @@
         <h2 class="subsection-title">AUTHOR CONTRIBUTION</h2>
         <p class="no-indent">XHZ and YW were involved in the conception and design of the study. YW contributed to the analysis and interpretation of the data. YW was involved in drafting the manuscript and revising it critically for important intellectual content. Each author has given final approval of the version to be published.</p>
         <h1 class="section-title">REFERENCES</h1>
-        <div class="references" style="line-height:1.69;">
+        <div class="references">
             <div>[1] Sung H, Ferlay J, Siegel RL, et al. Global Cancer Statistics 2020: GLOBOCAN Estimates of Incidence and Mortality Worldwide for 36 Cancers in 185 Countries. CA Cancer J Clin, 2021, 71(3): 209-249. DOI: <a href="https://doi.org/10.3322/caac.21660" target="_blank" style="color:#005a8c;text-decoration:none;">10.3322/caac.21660</a>.<br><span><a href="https://pubmed.ncbi.nlm.nih.gov/33538338/" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">PubMed</a> | <a href="https://scholar.google.com/scholar?q=Global%20Cancer%20Statistics%202020%20GLOBOCAN" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Google Scholar</a> | <a href="https://doi.org/10.3322/caac.21660" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Crossref</a></span></div>
             <div>[2] Okusaka T, Furuse J. Recent advances in chemotherapy for pancreatic cancer: evidence from Japan and recommendations in guidelines. J Gastroenterol, 2020, 55(4): 369-382. DOI: <a href="https://doi.org/10.1007/s00535-020-01666-y" target="_blank" style="color:#005a8c;text-decoration:none;">10.1007/s00535-020-01666-y</a>.<br><span><a href="https://pubmed.ncbi.nlm.nih.gov/32025975/" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">PubMed</a> | <a href="https://scholar.google.com/scholar?q=Recent%20advances%20chemotherapy%20pancreatic%20cancer%20Japan" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Google Scholar</a> | <a href="https://doi.org/10.1007/s00535-020-01666-y" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Crossref</a></span></div>
             <div>[3] Li D, Ambrogio L, Shimamura T, et al. BIBW2992, an irreversible EGFR/HER2 inhibitor highly effective in preclinical lung cancer models. Oncogene, 2008, 27(34): 4702-11. DOI: <a href="https://doi.org/10.1038/onc.2008.109" target="_blank" style="color:#005a8c;text-decoration:none;">10.1038/onc.2008.109</a>.<br><span><a href="https://pubmed.ncbi.nlm.nih.gov/18438426/" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">PubMed</a> | <a href="https://scholar.google.com/scholar?q=BIBW2992%20irreversible%20EGFR%20HER2%20inhibitor%20lung%20cancer" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Google Scholar</a> | <a href="https://doi.org/10.1038/onc.2008.109" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Crossref</a></span></div>
@@ -703,8 +718,8 @@
 <!-- ======================================== Page 10: References cont. ======================================== -->
 <div class="page">
     <div class="page-header">ZHANG ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.4;">
-        <div class="references" style="line-height:1.7;">
+    <div class="page-content two-column" style="line-height:1.35;">
+        <div class="references">
 
             <div>[14] Zhou X, Ye Z, Li Y, et al. Safety of SGLT2 Inhibitors: A Pharmacovigilance Study from 2013 to 2021 Based on FAERS. Front Pharmacol, 2021, 12: 766125. DOI: <a href="https://doi.org/10.3389/fphar.2021.766125" target="_blank" style="color:#005a8c;text-decoration:none;">10.3389/fphar.2021.766125</a>.<br><span><a href="https://pubmed.ncbi.nlm.nih.gov/34925029/" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">PubMed</a> | <a href="https://scholar.google.com/scholar?q=Safety%20SGLT2%20Inhibitors%20Pharmacovigilance%20FAERS" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Google Scholar</a> | <a href="https://doi.org/10.3389/fphar.2021.766125" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Crossref</a></span></div>
             <div>[15] Shu Y, He X, Liu Y, et al. A real-world pharmacovigilance study of axitinib: data mining of the public version of FDA adverse event reporting system. Expert Opin Drug Saf, 2022, 21(4): 563-572. DOI: <a href="https://doi.org/10.1080/14740338.2022.2016696" target="_blank" style="color:#005a8c;text-decoration:none;">10.1080/14740338.2022.2016696</a>.<br><span><a href="https://pubmed.ncbi.nlm.nih.gov/34983277/" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">PubMed</a> | <a href="https://scholar.google.com/scholar?q=real-world%20pharmacovigilance%20study%20axitinib%20Shu" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Google Scholar</a> | <a href="https://doi.org/10.1080/14740338.2022.2016696" target="_blank" style="color:#005a8c;text-decoration:none;font-size:7.5pt;">Crossref</a></span></div>

@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Identification of TGFB1 and TIMP1 as the Biomarkers of Clear Cell Renal Cell Carcinoma by Bioinformatic Methods</title>
-    <style>
+#!/usr/bin/env python3
+"""Generate two-column paginated HTML for TGFB1-TIMP1-ccRCC-Biomarkers paper."""
+
+import os
+
+OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ============================================================
+# CSS (from validated Erlotinib reference)
+# ============================================================
+CSS = """
         /* ========================================
            双栏模板样式 - MedBA Medicine期刊标准格式
            ======================================== */
@@ -111,12 +115,111 @@
             .page-header, .page-footer { position: absolute; }
         }
         @page { size: A4; margin: 0; }
-    </style>
-</head>
-<body>
+"""
 
+IMG_BASE = "https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers"
+
+def fig(n, caption, ident=None):
+    """Generate a figure element."""
+    id_attr = f' id="fig-{n}"' if ident else ""
+    return f'''<figure{id_attr}>
+                <img src="{IMG_BASE}/Figure {n}.jpg" alt="Figure {n}">
+                <figcaption><span class="fig-label">Figure {n}.</span> {caption}</figcaption>
+            </figure>'''
+
+def side_by_side(n1, cap1, n2, cap2):
+    """Generate side-by-side figures."""
+    return f'''<div class="side-by-side-figures">
+            <figure id="fig-{n1}">
+                <img src="{IMG_BASE}/Figure {n1}.jpg" alt="Figure {n1}">
+                <figcaption><span class="fig-label">Figure {n1}.</span> {cap1}</figcaption>
+            </figure>
+            <figure id="fig-{n2}">
+                <img src="{IMG_BASE}/Figure {n2}.jpg" alt="Figure {n2}">
+                <figcaption><span class="fig-label">Figure {n2}.</span> {cap2}</figcaption>
+            </figure>
+        </div>'''
+
+def header(text="ZHOU ET AL."):
+    return f'    <div class="page-header">{text}</div>'
+
+def footer(n):
+    return f'    <div class="page-footer">https://medbam.org<span class="page-num">{n}</span></div>'
+
+# ============================================================
+# Figure captions
+# ============================================================
+FIG_CAP = {
+    1: "Volcano plots of the GSE16441, GSE110249, and GSE36895 datasets. Differentially expressed genes were identified using the thresholds of |log\u2082FC| > 1 and <em>P</em> < 0.05.",
+    2: "Venn diagrams showing the overlapping upregulated (A) and downregulated (B) differentially expressed genes (DEGs) among the GSE16441, GSE110249, and GSE36895 datasets. A total of 608 shared DEGs were identified, including 267 upregulated genes and 341 downregulated genes.",
+    3: "Bubble plots showing the results of Gene Ontology (GO) and Kyoto Encyclopedia of Genes and Genomes (KEGG) enrichment analyses of the shared differentially expressed genes (DEGs). GO terms include biological process (BP), cellular component (CC), and molecular function (MF).",
+    4: "Construction of the protein\u2013protein interaction (PPI) network and identification of hub genes. (A) The PPI network of the differentially expressed genes (DEGs). (B) The most significant cluster in the PPI network identified using the MCODE algorithm. (C) The top 10 hub genes identified in the PPI network using the CytoHubba algorithm. Downregulated genes are shown as purple nodes, whereas upregulated genes are shown as red nodes.",
+    5: "Differential mRNA expression levels of hub genes between ccRCC tissues and normal kidney tissues based on GEPIA2 analysis. The mRNA expression levels of CAV1, FN1, PECAM1, TGFB1, TIMP1, and VEGFA were significantly higher in ccRCC tissues than in normal tissues. KIRC, kidney renal clear cell carcinoma. *<em>P</em> < 0.05.",
+    6: "Validation of TGFB1 and TIMP1 in ccRCC. The expression levels of TGFB1 and TIMP1 were correlated with tumor stage in ccRCC at both the mRNA level (A) and protein level (B). Kaplan\u2013Meier survival curves of TGFB1 and TIMP1 for overall survival were analyzed using the log-rank test, with hazard ratios (HRs) presented (C). *<em>P</em> < 0.05.",
+    7: "Association of TGFB1 and TIMP1 expression with TNM stage in ccRCC based on the TCGA database. (A) Landscape of TGFB1 expression across different TNM stages of ccRCC in the TCGA cohort. (B) Landscape of TIMP1 expression across different TNM stages of ccRCC in the TCGA cohort. (C) TGFB1 expression increased with advanced tumor stage and was associated with the primary tumor (T) classification. (D) TIMP1 expression was significantly elevated in advanced stages of ccRCC and was associated with the primary tumor (T), regional lymph node (N), and distant metastasis (M) classifications. NS, not significant.",
+    8: "Receiver operating characteristic (ROC) curves of TGFB1 (A) and TIMP1 (B) for ccRCC based on the TCGA database. AUC, area under the ROC curve.",
+    9: "GO and KEGG enrichment analyses of genes correlated with TGFB1 (A\u2013D) and TIMP1 (E\u2013H) in the TCGA database. The top five terms for each annotation were ranked according to <em>P</em> values.",
+    10: "Molecular docking analysis of drug\u2013target interactions. The binding of Bosentan and Ramipril to TGFB1 (A, B) and the binding of Meclizine and AM-630 to TIMP1 (C, D) are shown. A hydrogen bond was formed between Bosentan and TGFB1 at THR-55, with a binding energy of \u22123.2 kcal/mol (A). A hydrogen bond was formed between Ramipril and TGFB1 at VAL-79, with a binding energy of \u22123.25 kcal/mol (B). A hydrogen bond was formed between Meclizine and TIMP1 at THR-98, with a binding energy of \u22128.18 kcal/mol (C). A hydrogen bond was formed between AM-630 and TIMP1 at PHE-73, with a binding energy of \u22127.14 kcal/mol (D).",
+}
+
+# ============================================================
+# References (40 items)
+# ============================================================
+REFS = [
+    '[1] Turajlic S, Swanton C, Boshoff C: <b>Kidney cancer: The next decade</b>. <i>J Exp Med</i> 2018, <b>215</b>(10):2477-2479.',
+    '[2] Sung H, Ferlay J, Siegel RL, Laversanne M, Soerjomataram I, Jemal A, Bray F: <b>Global Cancer Statistics 2020: GLOBOCAN Estimates of Incidence and Mortality Worldwide for 36 Cancers in 185 Countries</b>. <i>CA Cancer J Clin</i> 2021, <b>71</b>(3):209-249.',
+    '[3] Atkins MB, Tannir NM: <b>Current and emerging therapies for first-line treatment of metastatic clear cell renal cell carcinoma</b>. <i>Cancer Treat Rev</i> 2018, <b>70</b>:127-137.',
+    '[4] Jonasch E, Walker CL, Rathmell WK: <b>Clear cell renal cell carcinoma ontogeny and mechanisms of lethality</b>. <i>Nat Rev Nephrol</i> 2021, <b>17</b>(4):245-261.',
+    '[5] Severins I, Joo C, van Noort J: <b>Exploring molecular biology in sequence space: The road to next-generation single-molecule biophysics</b>. <i>Mol Cell</i> 2022, <b>82</b>(10):1788-1805.',
+    '[6] Freire PP, Fernandez GJ, de Moraes D, Cury SS, Dal Pai-Silva M, Dos Reis PP, Rogatto SR, Carvalho RF: <b>The expression landscape of cachexia-inducing factors in human cancers</b>. <i>J Cachexia Sarcopenia Muscle</i> 2020, <b>11</b>(4):947-961.',
+    '[7] Barrett T, Troup DB, Wilhite SE, Ledoux P, Evangelista C, Kim IF, Tomashevsky M, Marshall KA, Phillippy KH, Sherman PM <i>et al</i>: <b>NCBI GEO: archive for functional genomics data sets&mdash;10 years on</b>. <i>Nucleic Acids Res</i> 2011, <b>39</b>(Database issue):D1005-1010.',
+    '[8] The Gene Ontology Consortium: <b>The Gene Ontology Resource: 20 years and still GOing strong</b>. <i>Nucleic Acids Res</i> 2019, <b>47</b>(D1):D330-D338.',
+    '[9] Kanehisa M, Furumichi M, Tanabe M, Sato Y, Morishima K: <b>KEGG: new perspectives on genomes, pathways, diseases and drugs</b>. <i>Nucleic Acids Res</i> 2017, <b>45</b>(D1):D353-D361.',
+    '[10] Chen L, Lu D, Sun K, Xu Y, Hu P, Li X, Xu F: <b>Identification of biomarkers associated with diagnosis and prognosis of colorectal cancer patients based on integrated bioinformatics analysis</b>. <i>Gene</i> 2019, <b>692</b>:119-125.',
+    '[11] Otasek D, Morris JH, Boucas J, Pico AR, Demchak B: <b>Cytoscape Automation: empowering workflow-based network analysis</b>. <i>Genome Biol</i> 2019, <b>20</b>(1):185.',
+    '[12] Fang HT, El Farran CA, Xing QR, Zhang LF, Li H, Lim B, Loh YH: <b>Global H3.3 dynamic deposition defines its bimodal role in cell fate transition</b>. <i>Nat Commun</i> 2018, <b>9</b>(1):1537.',
+    '[13] Su W, Zhao Y, Wei Y, Zhang X, Ji J, Yang S: <b>Exploring the Pathogenesis of Psoriasis Complicated With Atherosclerosis via Microarray Data Analysis</b>. <i>Front Immunol</i> 2021, <b>12</b>:667690.',
+    '[14] Huang X, Tang T, Zhang G, Liang T: <b>Identification of tumor antigens and immune subtypes of cholangiocarcinoma for mRNA vaccine development</b>. <i>Mol Cancer</i> 2021, <b>20</b>(1):50.',
+    '[15] Chandrashekar DS, Bashel B, Balasubramanya SAH, Creighton CJ, Ponce-Rodriguez I, Chakravarthi B, Varambally S: <b>UALCAN: A Portal for Facilitating Tumor Subgroup Gene Expression and Survival Analyses</b>. <i>Neoplasia</i> 2017, <b>19</b>(8):649-658.',
+    '[16] Sun CC, Li SJ, Hu W, Zhang J, Zhou Q, Liu C, Li LL, Songyang YY, Zhang F, Chen ZL <i>et al</i>: <b>Comprehensive Analysis of the Expression and Prognosis for E2Fs in Human Breast Cancer</b>. <i>Mol Ther</i> 2019, <b>27</b>(6):1153-1165.',
+    '[17] Di W, Fan W, Wu F, Shi Z, Wang Z, Yu M, Zhai Y, Chang Y, Pan C, Li G <i>et al</i>: <b>Clinical characterization and immunosuppressive regulation of CD161 (KLRB1) in glioma through 916 samples</b>. <i>Cancer Sci</i> 2022, <b>113</b>(2):756-769.',
+    '[18] Li X, Wei S, Niu S, Ma X, Li H, Jing M, Zhao Y: <b>Network pharmacology prediction and molecular docking-based strategy to explore the potential mechanism of Huanglian Jiedu Decoction against sepsis</b>. <i>Comput Biol Med</i> 2022, <b>144</b>:105389.',
+    '[19] Rydzanicz M, Wrzesinski T, Bluyssen HA, Wesoly J: <b>Genomics and epigenomics of clear cell renal cell carcinoma: recent developments and potential applications</b>. <i>Cancer Lett</i> 2013, <b>341</b>(2):111-126.',
+    '[20] Phallen J, Sausen M, Adleff V, Leal A, Hruban C, White J, Anagnostou V, Fiksel J, Cristiano S, Papp E <i>et al</i>: <b>Direct detection of early-stage cancers using circulating tumor DNA</b>. <i>Sci Transl Med</i> 2017, <b>9</b>(403).',
+    '[21] Henze AT, Acker T: <b>Feedback regulators of hypoxia-inducible factors and their role in cancer biology</b>. <i>Cell Cycle</i> 2010, <b>9</b>(14):2749-2763.',
+    '[22] Cowman SJ, Fuja DG, Liu X-D, Tidwell RSS, Kandula N, Sirohi D, Agarwal AM, Emerson LL, Tripp SR, Mohlman JS <i>et al</i>: <b>Macrophage HIF-1&alpha; Is an Independent Prognostic Indicator in Kidney Cancer</b>. <i>Clin Cancer Res</i> 2020, <b>26</b>(18):4970-4982.',
+    '[23] Reustle A, Di Marco M, Meyerhoff C, Nelde A, Walz JS, Winter S, Kandabarau S, Buttner F, Haag M, Backert L <i>et al</i>: <b>Integrative -omics and HLA-ligandomics analysis to identify novel drug targets for ccRCC immunotherapy</b>. <i>Genome Med</i> 2020, <b>12</b>(1):32.',
+    '[24] Schaeffeler E, Buttner F, Reustle A, Klumpp V, Winter S, Rausch S, Fisel P, Hennenlotter J, Kruck S, Stenzl A <i>et al</i>: <b>Metabolic and Lipidomic Reprogramming in Renal Cell Carcinoma Subtypes Reflects Regions of Tumor Origin</b>. <i>Eur Urol Focus</i> 2019, <b>5</b>(4):608-618.',
+    '[25] He B, Xu T, Pan B, Pan Y, Wang X, Dong J, Sun H, Xu X, Liu X, Wang S: <b>Polymorphisms of TGFBR1, TLR4 are associated with prognosis of gastric cancer in a Chinese population</b>. <i>Cancer Cell Int</i> 2018, <b>18</b>:191.',
+    '[26] Takahara T, Tsuyuki T, Satou A, Wada E, Sakurai K, Ueda R, Tsuzuki T: <b>TGFB1 mRNA expression is associated with poor prognosis and specific features of inflammation in ccRCC</b>. <i>Virchows Arch</i> 2022, <b>480</b>(3):635-643.',
+    '[27] Sun S, Su D, Dong T, Wang B, Ji X, Chu L, Lu S, Zhang T, Sun X, Liu Y <i>et al</i>: <b>Mitochondrial ribosomal protein L12 mediates metabolic reorganization in clear cell renal cell carcinoma by regulating mitochondrial biosynthesis</b>. <i>Cell Commun Signal</i> 2025, <b>23</b>(1):435.',
+    '[28] Wu P, Geng B, Chen Q, Zhao E, Liu J, Sun C, Zha C, Shao Y, You B, Zhang W <i>et al</i>: <b>Tumor Cell-Derived TGFbeta1 Attenuates Antitumor Immune Activity of T Cells via Regulation of PD-1 mRNA</b>. <i>Cancer Immunol Res</i> 2020, <b>8</b>(12):1470-1484.',
+    '[29] Chang NS: <b>Transforming growth factor-beta protection of cancer cells against tumor necrosis factor cytotoxicity is counteracted by hyaluronidase (review)</b>. <i>Int J Mol Med</i> 1998, <b>2</b>(6):653-659.',
+    '[30] Dias F, Teixeira AL, Nogueira I, Morais M, Maia J, Bodo C, Ferreira M, Vieira I, Silva J, Lobo J <i>et al</i>: <b>Plasma Extracellular Vesicle-Derived TIMP-1 mRNA as a Prognostic Biomarker in Clear Cell Renal Cell Carcinoma: A Pilot Study</b>. <i>Int J Mol Sci</i> 2020, <b>21</b>(13).',
+    '[31] Dias F, Teixeira AL, Nogueira I, Morais M, Maia J, Bodo C, Ferreira M, Vieira I, Silva J, Lobo J <i>et al</i>: <b>Plasma Extracellular Vesicle-Derived TIMP-1 mRNA as a Prognostic Biomarker in Clear Cell Renal Cell Carcinoma: A Pilot Study</b>. <i>Int J Mol Sci</i> 2020, <b>21</b>(13).',
+    '[32] Shang L, Liu HJ, Hao JJ, Jiang YY, Shi F, Zhang Y, Cai Y, Xu X, Jia XM, Zhan QM <i>et al</i>: <b>A panel of overexpressed proteins for prognosis in esophageal squamous cell carcinoma</b>. <i>PLoS One</i> 2014, <b>9</b>(10):e111045.',
+    '[33] Thomas DD, Heinecke JL, Ridnour LA, Cheng RY, Kesarwala AH, Switzer CH, McVicar DW, Roberts DD, Glynn S, Fukuto JM <i>et al</i>: <b>Signaling and stress: The redox landscape in NOS2 biology</b>. <i>Free Radic Biol Med</i> 2015, <b>87</b>:204-225.',
+    '[34] Chen J, Gu Y, Lin F, Yang H, Zhu W, Ma J, Lin S: <b>Endothelin receptor antagonist combined with a calcium channel blocker attenuates renal injury in spontaneous hypertensive rats with diabetes</b>. <i>Chin Med J (Engl)</i> 2002, <b>115</b>(7):972-978.',
+    '[35] Tzanidis A, Lim S, Hannan RD, See F, Ugoni AM, Krum H: <b>Combined angiotensin and endothelin receptor blockade attenuates adverse cardiac remodeling post-myocardial infarction in the rat: possible role of transforming growth factor beta(1)</b>. <i>J Mol Cell Cardiol</i> 2001, <b>33</b>(5):969-981.',
+    '[36] Soldano S, Pizzorni C, Paolino S, Trombetta AC, Montagna P, Brizzolara R, Ruaro B, Sulli A, Cutolo M: <b>Alternatively Activated (M2) Macrophage Phenotype Is Inducible by Endothelin-1 in Cultured Human Macrophages</b>. <i>PLoS One</i> 2016, <b>11</b>(11):e0166433.',
+    '[37] Caputo I, Caroccia B, Frasson I, Poggio E, Zamberlan S, Morpurgo M, Seccia TM, Cali T, Brini M, Richter SN <i>et al</i>: <b>Angiotensin II Promotes SARS-CoV-2 Infection via Upregulation of ACE2 in Human Bronchial Cells</b>. <i>Int J Mol Sci</i> 2022, <b>23</b>(9).',
+    '[38] Gross O, Beirowski B, Koepke ML, Kuck J, Reiner M, Addicks K, Smyth N, Schulze-Lohoff E, Weber M: <b>Preemptive ramipril therapy delays renal failure and reduces renal fibrosis in COL4A3-knockout mice with Alport syndrome</b>. <i>Kidney Int</i> 2003, <b>63</b>(2):438-446.',
+    '[39] Gohil VM, Offner N, Walker JA, Sheth SA, Fossale E, Gusella JF, MacDonald ME, Neri C, Mootha VK: <b>Meclizine is neuroprotective in models of Huntington\'s disease</b>. <i>Hum Mol Genet</i> 2011, <b>20</b>(2):294-300.',
+    '[40] Hosohata K, Quock RM, Hosohata Y, Burkey TH, Makriyannis A, Consroe P, Roeske WR, Yamamura HI: <b>AM630 is a competitive cannabinoid receptor antagonist in the guinea pig brain</b>. <i>Life Sci</i> 1997, <b>61</b>(9):PL115-118.',
+]
+
+# ============================================================
+# PAGE BUILDERS
+# ============================================================
+
+def page1():
+    """Cover page."""
+    intro_left = "Renal malignancies are among the ten most common cancers worldwide, accounting for approximately 2% of all human tumors [1]. According to global cancer statistics in 2020, about 431,288 new cases of renal cancer were diagnosed, with approximately 179,368 related deaths [2]. Clear cell renal cell carcinoma (ccRCC) is the most prevalent subtype of renal cell carcinoma, representing nearly 75% of cases [3]. Although radical or partial nephrectomy remains the primary treatment for localized ccRCC, approximately one-third of patients eventually develop distant metastases, resulting in limited therapeutic options and poor prognosis [4]. Despite advances in targeted therapies, drug resistance has emerged as a major clinical challenge, highlighting the urgent need to identify novel biomarkers and therapeutic strategies for ccRCC."
+    intro_right = "With the rapid development of next-generation sequencing technologies, high-throughput transcriptomic analyses have been widely applied in cancer research [5]. Publicly available databases, such as The Cancer Genome Atlas (TCGA) and the Gene Expression Omnibus (GEO), provide large-scale gene expression data that facilitate systematic bioinformatic investigations into cancer-related molecular mechanisms [6]. Although numerous bioinformatic studies have explored the molecular characteristics of ccRCC, most have focused on identifying diagnostic or prognostic biomarkers, while relatively few have investigated potential therapeutic agents targeting these key genes. In the present study, integrated bioinformatic analyses were performed to identify key genes associated with ccRCC progression and to explore potential therapeutic compounds. Differentially expressed genes were identified using multiple GEO datasets and subsequently validated in the TCGA database. Candidate drugs targeting the key genes were further screened, and molecular docking analyses were conducted to evaluate their binding potential. Overall, this study aims to provide new insights into the diagnosis and targeted treatment of ccRCC."
+
+    return f'''
 <div class="page">
-    <div class="page-content" style="line-height:1.4;display:flex;flex-direction:column;">
+    <div class="page-content" style="line-height:1.5;">
         <div id="cover">
             <div style="display:flex;justify-content:space-between;align-items:flex-end;font-size:7pt;border-bottom:0.5pt solid #000;padding-bottom:1mm;margin-bottom:2mm;">
                 <div style="flex:1;">February 2026 <span style="margin-left:2em;">DOI: 10.65079/xxx</span></div>
@@ -143,18 +246,24 @@
                 </div>
             </div>
         </div>
-        <div class="two-column" style="flex:1;min-height:0;overflow:hidden;line-height:1.6;">
+        <div style="margin-top:20mm;">
             <h1 class="section-title">1 INTRODUCTION</h1>
-            <p class="no-indent">Renal malignancies are among the ten most common cancers worldwide, accounting for approximately 2% of all human tumors [1]. According to global cancer statistics in 2020, about 431,288 new cases of renal cancer were diagnosed, with approximately 179,368 related deaths [2]. Clear cell renal cell carcinoma (ccRCC) is the most prevalent subtype of renal cell carcinoma, representing nearly 75% of cases [3]. Although radical or partial nephrectomy remains the primary treatment for localized ccRCC, approximately one-third of patients eventually develop distant metastases, resulting in limited therapeutic options and poor prognosis [4]. Despite advances in targeted therapies, drug resistance has emerged as a major clinical challenge, highlighting the urgent need to identify novel biomarkers and therapeutic strategies for ccRCC.</p>
-            <p>With the rapid development of next-generation sequencing technologies, high-throughput transcriptomic analyses have been widely applied in cancer research [5]. Publicly available databases, such as The Cancer Genome Atlas (TCGA) and the Gene Expression Omnibus (GEO), provide large-scale gene expression data that facilitate systematic bioinformatic investigations into cancer-related molecular mechanisms [6]. Although numerous bioinformatic studies have explored the molecular characteristics of ccRCC, most have focused on identifying diagnostic or prognostic biomarkers, while relatively few have investigated potential therapeutic agents targeting these key genes.</p>
-            <p>In the present study, integrated bioinformatic analyses were performed to identify key genes associated with ccRCC progression and to explore potential therapeutic compounds. Differentially expressed genes were identified using multiple GEO datasets and subsequently validated in the TCGA database. Candidate drugs targeting the key genes were further screened, and molecular docking analyses were conducted to evaluate their binding potential. Overall, this study aims to provide new insights into the diagnosis and targeted treatment of ccRCC.</p>
+            <div style="display:flex;gap:var(--column-gap);text-align:justify;line-height:1.5;">
+                <div style="flex:1;"><p class="no-indent">{intro_left}</p></div>
+                <div style="flex:1;"><p class="no-indent">{intro_right}</p></div>
+            </div>
         </div>
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">1</span></div>
-</div>
+{footer(1)}
+</div>'''
+
+
+def page2():
+    """Methods + Table 1 + Results 3.1 start."""
+    return f'''
 <div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:2.4;">
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <h1 class="section-title">2 MATERIALS AND METHODS</h1>
         <h2 class="subsection-title">2.1 Microarray data collection and identification of shared DEGs</h2>
         <p class="no-indent">The microarray datasets GSE11024, GSE16441, and GSE36895 were downloaded from the GEO database (https://www.ncbi.nlm.nih.gov/geo/). The corresponding platforms were GPL6671 (Affymetrix GeneChip Human Genome U133 Plus 2.0 Array) for GSE11024, GPL6480 (Agilent-014850 Whole Human Genome Microarray 4&times;44K G4112F) for GSE16441, and GPL570 (Affymetrix Human Genome U133 Plus 2.0 Array) for GSE36895. Differentially expressed genes (DEGs) between ccRCC tissues and normal renal tissues were identified using the GEO2R online analysis tool, which is based on the R programming language. The screening criteria were set as |log&#x2082; fold change (FC)| &gt; 1 and adjusted <em>P</em>-values &lt; 0.05 [7]. The R software (version 4.2.0) and the <em>ggplot2</em> package were used to generate volcano plots for visualization of the DEGs. Subsequently, overlapping DEGs among the three datasets were identified using a Venn diagram analysis.</p>
@@ -170,13 +279,7 @@
         <p class="no-indent">Active compounds associated with the key genes were screened using the Enrichr database (http://amp.pharm.mssm.edu/Enrichr), and the top two compounds were selected for molecular docking analysis. The crystal structures of the proteins encoded by the key genes and the 3D structures of the small molecule drugs were obtained from the RCSB Protein Data Bank (PDB, https://www.rcsb.org/) and PubChem database (https://pubchem.ncbi.nlm.nih.gov/), respectively. Molecular docking was performed using AutoDock Tools software (version 1.5.7), with the proteins defined as receptors and the compounds as ligands. For each docking simulation, fifty binding conformations were generated, and the conformation with the lowest binding energy was considered optimal. The optimal protein&ndash;ligand complexes were further visualized using PyMOL software (version 2.5.3) [18].</p>
         <h2 class="subsection-title">2.7 Statistical analysis</h2>
         <p class="no-indent">Statistical analyses were performed using R software. The differences in gene expression across clinical subgroups were assessed using the Student&rsquo;s <em>t</em>-test. A two-sided <em>P</em> value &lt; 0.05 was considered statistically significant.</p>
-    </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">2</span></div>
-</div>
-<div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:2.8;">
-        <h1 class="section-title">3 RESULTS</h1>
+
         <div class="table-wrapper" id="tbl-1">
             <div class="table-caption"><span class="tbl-label">Table 1.</span> A Summary of Microarray Datasets from Gene Expression Omnibus (GEO) database.</div>
             <table>
@@ -188,97 +291,88 @@
                 </tbody>
             </table>
         </div>
+
+        <h1 class="section-title">3 RESULTS</h1>
         <h2 class="subsection-title">3.1 Identification of DEGs</h2>
         <p class="no-indent">The GSE11024, GSE16441, and GSE36895 datasets were downloaded from the GEO database. This study included 10 ccRCC and 12 normal tissue samples from GSE11024, 17 ccRCC and 17 normal samples from GSE16441, and 23 ccRCC and 23 normal samples from GSE36895 (Table 1). Differentially expressed genes (DEGs) in each dataset were identified using the GEO2R online tool, with the cut-off criteria set as |log&#x2082; fold change (FC)| &gt; 1 and <em>P</em> &lt; 0.05. Volcano plots illustrating the DEGs in each dataset are shown in Figure 1. The overlap of up-regulated (Figure 2A) and down-regulated (Figure 2B) DEGs among the three datasets was visualized using Venn diagrams. In total, 608 shared DEGs were identified, including 267 up-regulated and 341 down-regulated genes (Supplementary Table 1).</p>
-        <div class="side-by-side-figures">
-            <figure id="fig-1">
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 1.jpg" alt="Figure 1">
-                <figcaption><span class="fig-label">Figure 1.</span> Volcano plots of the GSE16441, GSE110249, and GSE36895 datasets. Differentially expressed genes were identified using the thresholds of |log₂FC| > 1 and <em>P</em> < 0.05.</figcaption>
-            </figure>
-            <figure id="fig-2">
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 2.jpg" alt="Figure 2">
-                <figcaption><span class="fig-label">Figure 2.</span> Venn diagrams showing the overlapping upregulated (A) and downregulated (B) differentially expressed genes (DEGs) among the GSE16441, GSE110249, and GSE36895 datasets. A total of 608 shared DEGs were identified, including 267 upregulated genes and 341 downregulated genes.</figcaption>
-            </figure>
-        </div>
+    </div>
+{footer(2)}
+</div>'''
+
+
+def page3():
+    """Results 3.2 + Figures 1+2 + Figure 3."""
+    return f'''
+<div class="page">
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <h2 class="subsection-title">3.2 Gene enrichment analysis</h2>
         <p class="no-indent">As shown in Figure 3, GO enrichment analysis revealed that the shared DEGs were primarily involved in biological processes (BP) such as &ldquo;response to hypoxia,&rdquo; &ldquo;response to xenobiotic stimulus,&rdquo; &ldquo;response to drug,&rdquo; &ldquo;excretion,&rdquo; and &ldquo;angiogenesis.&rdquo; In the cellular component (CC) category, the DEGs were mainly enriched in &ldquo;extracellular exosome,&rdquo; &ldquo;apical plasma membrane,&rdquo; &ldquo;plasma membrane,&rdquo; and &ldquo;basolateral plasma membrane.&rdquo; Regarding molecular function (MF), the DEGs were predominantly associated with &ldquo;identical protein binding,&rdquo; &ldquo;extracellular matrix structural constituent,&rdquo; &ldquo;protein binding,&rdquo; and &ldquo;calcium ion binding.&rdquo; KEGG pathway analysis indicated that the shared DEGs were significantly enriched in &ldquo;carbon metabolism,&rdquo; &ldquo;HIF-1 signaling pathway,&rdquo; and &ldquo;metabolic pathways.&rdquo;</p>
+        {side_by_side(1, FIG_CAP[1], 2, FIG_CAP[2])}
+        {fig(3, FIG_CAP[3])}
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">3</span></div>
-</div>
+{footer(3)}
+</div>'''
+
+
+def page4():
+    """Results 3.3 + Figure 4 + Figure 5."""
+    return f'''
 <div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.9;">
-        <figure>
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 3.jpg" alt="Figure 3">
-                <figcaption><span class="fig-label">Figure 3.</span> Bubble plots showing the results of Gene Ontology (GO) and Kyoto Encyclopedia of Genes and Genomes (KEGG) enrichment analyses of the shared differentially expressed genes (DEGs). GO terms include biological process (BP), cellular component (CC), and molecular function (MF).</figcaption>
-            </figure>
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <h2 class="subsection-title">3.3 Construction of PPI and identification of key genes</h2>
         <p class="no-indent">The protein&ndash;protein interaction (PPI) network of shared DEGs consisted of 558 nodes and 5,560 edges (Figure 4A). The top-ranked cluster was identified using the MCODE algorithm (Figure 4B). The top 10 hub genes were selected using the CytoHubba plugin, among which FN1, TIMP1, VEGFA, TGFB1, PECAM1, and CAV1 were up-regulated, while CXCL12, EGF, CTGF, and PLG were down-regulated across GSE11024, GSE16441, and GSE36895 datasets (Figure 4C). All top 10 hub genes identified by CytoHubba were included in the top MCODE cluster, suggesting their central roles in the ccRCC PPI network.</p>
+        {fig(4, FIG_CAP[4])}
         <p>Validation in GEPIA2 revealed that the mRNA expression levels of FN1, TIMP1, VEGFA, TGFB1, PECAM1, and CAV1 were significantly up-regulated in ccRCC tissues compared with normal tissues (Figure 5). Further analysis of these genes across different tumor stages using GEPIA2 and UALCAN indicated that only TGFB1 and TIMP1 expression levels were consistently correlated with ccRCC progression at both mRNA (Figure 6A) and protein levels (Figure 6B), suggesting their potential roles in promoting tumor progression. Kaplan&ndash;Meier survival analysis demonstrated that high expression of TGFB1 and TIMP1 was associated with poorer overall survival in ccRCC patients (Figure 6C).</p>
+        {fig(5, FIG_CAP[5])}
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">4</span></div>
-</div>
+{footer(4)}
+</div>'''
+
+
+def page5():
+    """Figure 6 + Results 3.4 start."""
+    return f'''
 <div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.6;">
-        <figure>
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 4.jpg" alt="Figure 4">
-                <figcaption><span class="fig-label">Figure 4.</span> Construction of the protein–protein interaction (PPI) network and identification of hub genes. (A) The PPI network of the differentially expressed genes (DEGs). (B) The most significant cluster in the PPI network identified using the MCODE algorithm. (C) The top 10 hub genes identified in the PPI network using the CytoHubba algorithm. Downregulated genes are shown as purple nodes, whereas upregulated genes are shown as red nodes.</figcaption>
-            </figure>
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
+        {fig(6, FIG_CAP[6])}
         <h2 class="subsection-title">3.4 Verification of TGFB1 and TIMP1 in the TCGA database</h2>
         <p class="no-indent">Given the pivotal roles of TGFB1 and TIMP1 in ccRCC, their expression was further validated using the TCGA dataset. A heatmap was generated to illustrate the correlation between these two genes and the TNM stage of ccRCC. After excluding samples with missing clinical information and cases with Mx (metastasis not evaluated) or Nx (regional lymph node not evaluated), a total of 529 samples were retained for TNM stage analysis (266 Stage I, 57 Stage II, 123 Stage III, 83 Stage IV). For individual TNM components, 532 samples were included for T stage (126 T1, 69 T2, 180 T3, 11 T4), 256 samples for N stage (240 N0, 16 N1), and 500 samples for M stage (421 M0, 79 M1).</p>
         <p>The heatmaps indicated that TGFB1 (Figure 7A) and TIMP1 (Figure 7B) were more highly expressed in advanced stages of ccRCC. Boxplot analyses further demonstrated that TGFB1 and TIMP1 expression levels were significantly elevated in stage III&ndash;IV compared to stage I&ndash;II (<em>P</em> = 0.0093) and in T3&ndash;T4 compared to T1&ndash;T2 (<em>P</em> = 0.0021) (Figure 7C, 7D). Moreover, TIMP1 expression was significantly higher in N1 compared to N0 (<em>P</em> = 0.033) and in M1 compared to M0 (<em>P</em> = 0.0003) (Figure 7D). In contrast, TGFB1 expression did not show significant differences across N or M stages (Figure 7C). These results suggest that TGFB1 and TIMP1 are associated with tumor progression in ccRCC, with TIMP1 exhibiting a broader correlation with TNM components.</p>
+        {fig(7, FIG_CAP[7])}
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">5</span></div>
-</div>
+{footer(5)}
+</div>'''
+
+
+def page6():
+    """Figure 8 + ROC + Pearson + Figure 9."""
+    return f'''
 <div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:2.8;">
-        <div class="side-by-side-figures">
-            <figure id="fig-5">
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 5.jpg" alt="Figure 5">
-                <figcaption><span class="fig-label">Figure 5.</span> Differential mRNA expression levels of hub genes between ccRCC tissues and normal kidney tissues based on GEPIA2 analysis. The mRNA expression levels of CAV1, FN1, PECAM1, TGFB1, TIMP1, and VEGFA were significantly higher in ccRCC tissues than in normal tissues. KIRC, kidney renal clear cell carcinoma. *<em>P</em> < 0.05.</figcaption>
-            </figure>
-            <figure id="fig-6">
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 6.jpg" alt="Figure 6">
-                <figcaption><span class="fig-label">Figure 6.</span> Validation of TGFB1 and TIMP1 in ccRCC. The expression levels of TGFB1 and TIMP1 were correlated with tumor stage in ccRCC at both the mRNA level (A) and protein level (B). Kaplan–Meier survival curves of TGFB1 and TIMP1 for overall survival were analyzed using the log-rank test, with hazard ratios (HRs) presented (C). *<em>P</em> < 0.05.</figcaption>
-            </figure>
-        </div>
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <p class="no-indent">To evaluate the expression specificity of TGFB1 and TIMP1 in ccRCC, receiver operating characteristic (ROC) curves were constructed based on 532 ccRCC samples and 72 normal samples from the TCGA database. The area under the curve (AUC) was 0.883 for TGFB1 (Figure 8A) and 0.871 for TIMP1 (Figure 8B), indicating that both genes are specifically enriched in ccRCC and may serve as potential diagnostic biomarkers.</p>
-    </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">6</span></div>
-</div>
-<div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.9;">
-        <figure>
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 7.jpg" alt="Figure 7">
-                <figcaption><span class="fig-label">Figure 7.</span> Association of TGFB1 and TIMP1 expression with TNM stage in ccRCC based on the TCGA database. (A) Landscape of TGFB1 expression across different TNM stages of ccRCC in the TCGA cohort. (B) Landscape of TIMP1 expression across different TNM stages of ccRCC in the TCGA cohort. (C) TGFB1 expression increased with advanced tumor stage and was associated with the primary tumor (T) classification. (D) TIMP1 expression was significantly elevated in advanced stages of ccRCC and was associated with the primary tumor (T), regional lymph node (N), and distant metastasis (M) classifications. NS, not significant.</figcaption>
-            </figure>
-        <figure>
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 8.jpg" alt="Figure 8">
-                <figcaption><span class="fig-label">Figure 8.</span> Receiver operating characteristic (ROC) curves of TGFB1 (A) and TIMP1 (B) for ccRCC based on the TCGA database. AUC, area under the ROC curve.</figcaption>
-            </figure>
-        <p class="no-indent">Pearson correlation analysis (|R| &gt; 0.5, <em>P</em> &lt; 0.05) was then performed to identify genes co-expressed with TGFB1 and TIMP1 in the TCGA dataset. Subsequent GO and KEGG enrichment analyses were conducted based on these correlated genes. For TGFB1, the biological processes were primarily related to epithelial-to-mesenchymal transition (Figure 9A), the molecular functions involved protein binding (Figure 9C), and the cellular components and signaling pathways were mainly associated with focal adhesion (Figure 9B, 9D).</p>
+        {fig(8, FIG_CAP[8])}
+        <p>Pearson correlation analysis (|R| &gt; 0.5, <em>P</em> &lt; 0.05) was then performed to identify genes co-expressed with TGFB1 and TIMP1 in the TCGA dataset. Subsequent GO and KEGG enrichment analyses were conducted based on these correlated genes. For TGFB1, the biological processes were primarily related to epithelial-to-mesenchymal transition (Figure 9A), the molecular functions involved protein binding (Figure 9C), and the cellular components and signaling pathways were mainly associated with focal adhesion (Figure 9B, 9D).</p>
         <p>For TIMP1, the associated biological processes included collagen fibril organization, extracellular matrix organization, and skeletal system development (Figure 9E). The cellular components were enriched in extracellular matrix, extracellular space, and extracellular region (Figure 9F). Molecular functions included extracellular matrix structural constituent, extracellular matrix structural constituent conferring tensile strength, and collagen binding (Figure 9G). KEGG pathway analysis revealed that TIMP1-associated signaling pathways involved protein digestion and absorption, ECM&ndash;receptor interaction, and focal adhesion (Figure 9H). These results suggest that TGFB1 and TIMP1 may contribute to ccRCC progression through extracellular matrix remodeling and focal adhesion-related pathways.</p>
+        {fig(9, FIG_CAP[9])}
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">7</span></div>
-</div>
+{footer(6)}
+</div>'''
+
+
+def page7():
+    """Results 3.5 + Table 2 + Figure 10."""
+    return f'''
 <div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.9;">
-        <figure>
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 9.jpg" alt="Figure 9">
-                <figcaption><span class="fig-label">Figure 9.</span> GO and KEGG enrichment analyses of genes correlated with TGFB1 (A–D) and TIMP1 (E–H) in the TCGA database. The top five terms for each annotation were ranked according to <em>P</em> values.</figcaption>
-            </figure>
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <h2 class="subsection-title">3.5 Molecular docking of active drugs and targets</h2>
         <p class="no-indent">Finally, active compounds targeting TGFB1 and TIMP1 were identified using the Enrichr database. Bosentan and Ramipril exhibited favorable binding scores with TGFB1, whereas Meclizine and AM-630 showed good binding scores with TIMP1 (Table 2). To validate these interactions, the crystal structures of TGFB1 and TIMP1 were obtained from the PDB database, and the 2D structures of Bosentan, Ramipril, Meclizine, and AM-630 were retrieved from the PubChem database.</p>
-    </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">8</span></div>
-</div>
-<div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:2.3;">
+        <p>Molecular docking was performed using AutoDock software, with TGFB1 and TIMP1 defined as receptors and the compounds as ligands. The results demonstrated that Bosentan and Ramipril formed hydrogen bonds with the amino acid residues THR-55 and VAL-79 of TGFB1, with binding energies of &minus;3.25 kcal/mol and &minus;3.2 kcal/mol, respectively (Figure 10A, 10B). Similarly, Meclizine and AM-630 formed hydrogen bonds with THR-98 and PHE-73 of TIMP1, exhibiting binding energies of &minus;8.18 kcal/mol and &minus;7.14 kcal/mol, respectively (Figure 10C, 10D). These findings suggest that these compounds may interact specifically with TGFB1 and TIMP1, providing potential therapeutic options for ccRCC.</p>
+
         <div class="table-wrapper" id="tbl-2">
             <div class="table-caption"><span class="tbl-label">Table 2.</span> The significant drugs related to TGFB1 and TIMP1.</div>
             <table>
@@ -291,23 +385,35 @@
                 </tbody>
             </table>
         </div>
-        <p class="no-indent">Molecular docking was performed using AutoDock software, with TGFB1 and TIMP1 defined as receptors and the compounds as ligands. The results demonstrated that Bosentan and Ramipril formed hydrogen bonds with the amino acid residues THR-55 and VAL-79 of TGFB1, with binding energies of &minus;3.25 kcal/mol and &minus;3.2 kcal/mol, respectively (Figure 10A, 10B). Similarly, Meclizine and AM-630 formed hydrogen bonds with THR-98 and PHE-73 of TIMP1, exhibiting binding energies of &minus;8.18 kcal/mol and &minus;7.14 kcal/mol, respectively (Figure 10C, 10D). These findings suggest that these compounds may interact specifically with TGFB1 and TIMP1, providing potential therapeutic options for ccRCC.</p>
-        <figure>
-                <img src="https://medbam.org/assets/TGFB1-TIMP1-ccRCC-Biomarkers/Figure 10.jpg" alt="Figure 10">
-                <figcaption><span class="fig-label">Figure 10.</span> Molecular docking analysis of drug–target interactions. The binding of Bosentan and Ramipril to TGFB1 (A, B) and the binding of Meclizine and AM-630 to TIMP1 (C, D) are shown. A hydrogen bond was formed between Bosentan and TGFB1 at THR-55, with a binding energy of −3.2 kcal/mol (A). A hydrogen bond was formed between Ramipril and TGFB1 at VAL-79, with a binding energy of −3.25 kcal/mol (B). A hydrogen bond was formed between Meclizine and TIMP1 at THR-98, with a binding energy of −8.18 kcal/mol (C). A hydrogen bond was formed between AM-630 and TIMP1 at PHE-73, with a binding energy of −7.14 kcal/mol (D).</figcaption>
-            </figure>
+        {fig(10, FIG_CAP[10])}
+    </div>
+{footer(7)}
+</div>'''
+
+
+def page8():
+    """Discussion paragraphs 1-4."""
+    return f'''
+<div class="page">
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <h1 class="section-title">4 DISCUSSION</h1>
         <p class="no-indent">Clear cell renal cell carcinoma is the most common type of renal cancer and about 30% of patients had developed metastasis before clinical diagnosis. Even worse, about 30%-50% of the other patients would develop metastasis during follow-up diagnosis and treatment [19]. Patients with metastatic ccRCC show poor sensitivity to radiotherapy and chemotherapy, with poor prognosis and a 5-year survival rate of less than 10% [19]. Therefore, it is pressing to find new biomarkers and effective therapeutic targets for ccRCC. Nowadays, bioinformatics provides a platform to further explore the molecular mechanisms of tumors, making it possible to find biomarkers of tumors and aid oncotherapy at the genetic level [20].</p>
-    </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">9</span></div>
-</div>
-<div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.88;">
-        <p class="no-indent">By bioinformatics methods, we identified a total of 608 shared DEGs in GSE11024, GSE16441, and GSE36895 datasets, including 267 up-regulated genes and 341 down-regulated genes. Judging from the results of GO and KEGG enrichment analysis, response to hypoxia, angiogenesis, and HIF-1 signaling pathway suggested that hypoxia was involved in the development of ccRCC. Importantly, the previous study had shown that hypoxia was closely related to tumor progression, and hypoxia-inducible factors 1 (HIF-1) played a central role in regulating the cellular response to hypoxia [21]. In the hypoxic tumor microenvironment, HIF-1 proteins were activated and thus increased the ability of tumor aggressiveness [22]. Moreover, &lsquo;Carbon metabolism&rsquo; and &lsquo;Metabolic pathways&rsquo; enriched in KEGG pathways suggested that metabolism was also essential for ccRCC. ccRCC is also regarded as a metabolic disease with major alterations in energy and lipid metabolism [23, 24].</p>
+        <p>By bioinformatics methods, we identified a total of 608 shared DEGs in GSE11024, GSE16441, and GSE36895 datasets, including 267 up-regulated genes and 341 down-regulated genes. Judging from the results of GO and KEGG enrichment analysis, response to hypoxia, angiogenesis, and HIF-1 signaling pathway suggested that hypoxia was involved in the development of ccRCC. Importantly, the previous study had shown that hypoxia was closely related to tumor progression, and hypoxia-inducible factors 1 (HIF-1) played a central role in regulating the cellular response to hypoxia [21]. In the hypoxic tumor microenvironment, HIF-1 proteins were activated and thus increased the ability of tumor aggressiveness [22]. Moreover, &lsquo;Carbon metabolism&rsquo; and &lsquo;Metabolic pathways&rsquo; enriched in KEGG pathways suggested that metabolism was also essential for ccRCC. ccRCC is also regarded as a metabolic disease with major alterations in energy and lipid metabolism [23, 24].</p>
         <p>After the construction of the PPI network of shared DEGs, the top 10 hub genes were identified. The expressional differences of 9 hub genes between ccRCC tissues and normal tissues were consistent with the results of the GEPIA2 database. A total of 6 genes including FN1, TIMP1, VEGFA, TGFB1, PECAM1, and CAV1 were up-regulated in ccRCC, in which TGFB1 and TIMP1 were found to be correlated with the progression and prognosis of ccRCC. In the TCGA database, we further proved that TGFB1 and TIMP1 were highly expressed in the higher TNM stage of ccRCC and showed good expression specificity in ccRCC, which suggested that TGFB1 and TIMP1 may be the potential biomarkers of ccRCC.</p>
         <p>Transforming growth factor beta 1 (TGFB1) is a multifunctional cytokine that plays a complex role in tumor biology, acting as a tumor suppressor in early stages but promoting invasion and metastasis in advanced cancers [25]. Our findings demonstrate that TGFB1 is significantly upregulated in ccRCC and correlates with advanced TNM stage and poor prognosis. These observations are consistent with a recent clinicopathological study utilizing tissue microarrays and RNA in situ hybridization in a cohort of 158 ccRCC patients [26]. Mechanistically, the upregulation of TGFB1 in the tumor microenvironment activates both canonical (SMAD-dependent) and non-canonical signaling pathways. This activation leads to the downregulation of epithelial markers such as E-cadherin and upregulation of mesenchymal markers like N-cadherin and Vimentin, thereby disrupting cell-cell adhesion and endowing ccRCC cells with migratory and invasive capabilities [27]. In the context of the tumor microenvironment, TGFB1 additionally contributes to immune evasion by promoting regulatory T cell differentiation and suppressing cytotoxic T cell function, as previously demonstrated in renal cancer models [28, 29].</p>
-        <p>TIMP metallopeptidase inhibitor 1 (TIMP1) is traditionally recognized as an endogenous inhibitor of matrix metalloproteinases (MMPs), but emerging evidence highlights its MMP-independent, pro-tumorigenic functions [30]. Our study found TIMP1 to be significantly upregulated in ccRCC, with high expression associated with lymph node metastasis, distant metastasis, and poor survival. This is consistent with a recent study by Dias et al, which demonstrated that plasma extracellular vesicle-derived TIMP-1 mRNA levels were significantly elevated in metastatic ccRCC patients compared to those with localized disease (<em>P</em> = 0.002) and in patients with larger tumors (&gt;7 cm) among the localized group (<em>P</em> = 0.020). Furthermore, higher TIMP-1 EV-derived mRNA levels were associated with reduced overall survival (<em>P</em> = 0.030), supporting its potential as a prognostic biomarker in ccRCC [31]. Notably, the detection of TIMP1 mRNA in plasma EVs suggests that TIMP1-related signals can be systemically transported, potentially influencing distant microenvironments. Although TIMP1 is classically involved in maintaining extracellular matrix (ECM) homeostasis by counterbalancing MMP activity [32], the paradoxical association of its high expression with poor prognosis suggests additional mechanisms. Our co-expression and enrichment analyses revealed that TIMP1-associated genes were predominantly involved in &ldquo;ECM-receptor interaction,&rdquo; and &ldquo;focal adhesion.&rdquo; This supports the notion that TIMP1 may act as a signaling molecule independent of MMP inhibition. Specifically, TIMP1 has been shown to bind to the cell surface tetraspanin CD63, initiating integrin &beta;1-mediated survival signaling cascades such as the PI3K/AKT and MAPK pathways, thereby promoting cell proliferation and resistance to apoptosis [33]. In ccRCC, this signaling axis could create a pro-metastatic niche by enhancing cancer cell survival during detachment from the primary tumor, facilitating the colonization of distant organs.</p>
+    </div>
+{footer(8)}
+</div>'''
+
+
+def page9():
+    """Discussion paragraphs 5-7 + Conclusion + Back matter."""
+    return f'''
+<div class="page">
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
+        <p class="no-indent">TIMP metallopeptidase inhibitor 1 (TIMP1) is traditionally recognized as an endogenous inhibitor of matrix metalloproteinases (MMPs), but emerging evidence highlights its MMP-independent, pro-tumorigenic functions [30]. Our study found TIMP1 to be significantly upregulated in ccRCC, with high expression associated with lymph node metastasis, distant metastasis, and poor survival. This is consistent with a recent study by Dias et al, which demonstrated that plasma extracellular vesicle-derived TIMP-1 mRNA levels were significantly elevated in metastatic ccRCC patients compared to those with localized disease (<em>P</em> = 0.002) and in patients with larger tumors (&gt;7 cm) among the localized group (<em>P</em> = 0.020). Furthermore, higher TIMP-1 EV-derived mRNA levels were associated with reduced overall survival (<em>P</em> = 0.030), supporting its potential as a prognostic biomarker in ccRCC [31]. Notably, the detection of TIMP1 mRNA in plasma EVs suggests that TIMP1-related signals can be systemically transported, potentially influencing distant microenvironments. Although TIMP1 is classically involved in maintaining extracellular matrix (ECM) homeostasis by counterbalancing MMP activity [32], the paradoxical association of its high expression with poor prognosis suggests additional mechanisms. Our co-expression and enrichment analyses revealed that TIMP1-associated genes were predominantly involved in &ldquo;ECM-receptor interaction,&rdquo; and &ldquo;focal adhesion.&rdquo; This supports the notion that TIMP1 may act as a signaling molecule independent of MMP inhibition. Specifically, TIMP1 has been shown to bind to the cell surface tetraspanin CD63, initiating integrin &beta;1-mediated survival signaling cascades such as the PI3K/AKT and MAPK pathways, thereby promoting cell proliferation and resistance to apoptosis [33]. In ccRCC, this signaling axis could create a pro-metastatic niche by enhancing cancer cell survival during detachment from the primary tumor and facilitating colonization at distant sites.</p>
         <p>Even though the key role of TGFB1 and TIMP1 in ccRCC, very few drugs were designed to target them. In the Enrichr database, we found that Bosentan and Ramipril were correlated with TGFB1, and Meclizine and AM-630 were correlated with TIMP1. The results of molecular docking further proved the good binding capacity of these active drugs to TGFB1 and TIMP1, suggesting that these active drugs may exert anti-tumor efficacy in ccRCC. Bosentan is an antagonist of the endothelin-1 (ET-1) receptor and is used primarily for the treatment of pulmonary arterial hypertension (PAH). A previous study proved that Bosentan combined with amlodipine could abolish the expression of TGFB1 in the kidney [34]. Similarly, this down-regulated of TGFB1 was also observed when combining Bosentan with valsartan [35]. Mechanistically, ET-1 could increase the protein and gene expression of TGFB1 and Bosentan could inhibit this effect by blocking the ET-1 receptor [36]. Ramipril is an inhibitor of angiotensin-converting enzyme (ACE) [37]. The early study proved that Ramipril exerted antiproteinuric and antifibrotic nephroprotective effects by down-regulating TGF-beta1 [38]. Meclizine is an antihistamine that reversibly inhibits the interaction of histamine with H1 receptors [39] and Iodopravadoline (AM630) is an antagonist of cannabinoid receptors [40]. However, there were few studies about their interaction with TIMP1. In all, the active drugs screened out by our study may exert an anti-tumor effect by targeting TGFB1 or TIMP1.</p>
         <p>Nevertheless, several limitations of this study should be acknowledged. First, although we utilized multiple GEO datasets and validated our findings in the TCGA cohort, heterogeneity across datasets (such as different microarray platforms and sample processing methods) may introduce potential bias into the identification of DEGs. Second, our study is primarily bioinformatic and correlative. While we identified TGFB1 and TIMP1 as key genes and performed molecular docking, the lack of in vitro and in vivo experimental validation limits our ability to draw definitive conclusions about the causal roles of these genes or the therapeutic efficacy of the screened drugs in ccRCC. Third, the molecular docking analysis provides preliminary evidence of binding affinity, but these interactions need to be confirmed by experimental techniques such as surface plasmon resonance (SPR) or cellular thermal shift assays (CETSA) to validate target engagement.</p>
         <h1 class="section-title">5 CONCLUSION</h1>
@@ -319,56 +425,56 @@
         <h1 class="section-title">CONFLICTS OF INTEREST</h1>
         <p class="no-indent">The authors declare that there is no conflict of interest regarding the publication of this article.</p>
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">10</span></div>
-</div>
+{footer(9)}
+</div>'''
+
+
+def page10():
+    """References 1-40."""
+    refs_html = "\n            ".join(f'<div>{r}</div>' for r in REFS)
+    return f'''
 <div class="page">
-    <div class="page-header">ZHOU ET AL.</div>
-    <div class="page-content two-column" style="line-height:1.86;">
+{header()}
+    <div class="page-content two-column" style="line-height:1.4;">
         <h1 class="section-title">REFERENCES</h1>
         <div class="references">
-            <div>[1] Turajlic S, Swanton C, Boshoff C: <b>Kidney cancer: The next decade</b>. <i>J Exp Med</i> 2018, <b>215</b>(10):2477-2479.</div>
-            <div>[2] Sung H, Ferlay J, Siegel RL, Laversanne M, Soerjomataram I, Jemal A, Bray F: <b>Global Cancer Statistics 2020: GLOBOCAN Estimates of Incidence and Mortality Worldwide for 36 Cancers in 185 Countries</b>. <i>CA Cancer J Clin</i> 2021, <b>71</b>(3):209-249.</div>
-            <div>[3] Atkins MB, Tannir NM: <b>Current and emerging therapies for first-line treatment of metastatic clear cell renal cell carcinoma</b>. <i>Cancer Treat Rev</i> 2018, <b>70</b>:127-137.</div>
-            <div>[4] Jonasch E, Walker CL, Rathmell WK: <b>Clear cell renal cell carcinoma ontogeny and mechanisms of lethality</b>. <i>Nat Rev Nephrol</i> 2021, <b>17</b>(4):245-261.</div>
-            <div>[5] Severins I, Joo C, van Noort J: <b>Exploring molecular biology in sequence space: The road to next-generation single-molecule biophysics</b>. <i>Mol Cell</i> 2022, <b>82</b>(10):1788-1805.</div>
-            <div>[6] Freire PP, Fernandez GJ, de Moraes D, Cury SS, Dal Pai-Silva M, Dos Reis PP, Rogatto SR, Carvalho RF: <b>The expression landscape of cachexia-inducing factors in human cancers</b>. <i>J Cachexia Sarcopenia Muscle</i> 2020, <b>11</b>(4):947-961.</div>
-            <div>[7] Barrett T, Troup DB, Wilhite SE, Ledoux P, Evangelista C, Kim IF, Tomashevsky M, Marshall KA, Phillippy KH, Sherman PM <i>et al</i>: <b>NCBI GEO: archive for functional genomics data sets&mdash;10 years on</b>. <i>Nucleic Acids Res</i> 2011, <b>39</b>(Database issue):D1005-1010.</div>
-            <div>[8] The Gene Ontology Consortium: <b>The Gene Ontology Resource: 20 years and still GOing strong</b>. <i>Nucleic Acids Res</i> 2019, <b>47</b>(D1):D330-D338.</div>
-            <div>[9] Kanehisa M, Furumichi M, Tanabe M, Sato Y, Morishima K: <b>KEGG: new perspectives on genomes, pathways, diseases and drugs</b>. <i>Nucleic Acids Res</i> 2017, <b>45</b>(D1):D353-D361.</div>
-            <div>[10] Chen L, Lu D, Sun K, Xu Y, Hu P, Li X, Xu F: <b>Identification of biomarkers associated with diagnosis and prognosis of colorectal cancer patients based on integrated bioinformatics analysis</b>. <i>Gene</i> 2019, <b>692</b>:119-125.</div>
-            <div>[11] Otasek D, Morris JH, Boucas J, Pico AR, Demchak B: <b>Cytoscape Automation: empowering workflow-based network analysis</b>. <i>Genome Biol</i> 2019, <b>20</b>(1):185.</div>
-            <div>[12] Fang HT, El Farran CA, Xing QR, Zhang LF, Li H, Lim B, Loh YH: <b>Global H3.3 dynamic deposition defines its bimodal role in cell fate transition</b>. <i>Nat Commun</i> 2018, <b>9</b>(1):1537.</div>
-            <div>[13] Su W, Zhao Y, Wei Y, Zhang X, Ji J, Yang S: <b>Exploring the Pathogenesis of Psoriasis Complicated With Atherosclerosis via Microarray Data Analysis</b>. <i>Front Immunol</i> 2021, <b>12</b>:667690.</div>
-            <div>[14] Huang X, Tang T, Zhang G, Liang T: <b>Identification of tumor antigens and immune subtypes of cholangiocarcinoma for mRNA vaccine development</b>. <i>Mol Cancer</i> 2021, <b>20</b>(1):50.</div>
-            <div>[15] Chandrashekar DS, Bashel B, Balasubramanya SAH, Creighton CJ, Ponce-Rodriguez I, Chakravarthi B, Varambally S: <b>UALCAN: A Portal for Facilitating Tumor Subgroup Gene Expression and Survival Analyses</b>. <i>Neoplasia</i> 2017, <b>19</b>(8):649-658.</div>
-            <div>[16] Sun CC, Li SJ, Hu W, Zhang J, Zhou Q, Liu C, Li LL, Songyang YY, Zhang F, Chen ZL <i>et al</i>: <b>Comprehensive Analysis of the Expression and Prognosis for E2Fs in Human Breast Cancer</b>. <i>Mol Ther</i> 2019, <b>27</b>(6):1153-1165.</div>
-            <div>[17] Di W, Fan W, Wu F, Shi Z, Wang Z, Yu M, Zhai Y, Chang Y, Pan C, Li G <i>et al</i>: <b>Clinical characterization and immunosuppressive regulation of CD161 (KLRB1) in glioma through 916 samples</b>. <i>Cancer Sci</i> 2022, <b>113</b>(2):756-769.</div>
-            <div>[18] Li X, Wei S, Niu S, Ma X, Li H, Jing M, Zhao Y: <b>Network pharmacology prediction and molecular docking-based strategy to explore the potential mechanism of Huanglian Jiedu Decoction against sepsis</b>. <i>Comput Biol Med</i> 2022, <b>144</b>:105389.</div>
-            <div>[19] Rydzanicz M, Wrzesinski T, Bluyssen HA, Wesoly J: <b>Genomics and epigenomics of clear cell renal cell carcinoma: recent developments and potential applications</b>. <i>Cancer Lett</i> 2013, <b>341</b>(2):111-126.</div>
-            <div>[20] Phallen J, Sausen M, Adleff V, Leal A, Hruban C, White J, Anagnostou V, Fiksel J, Cristiano S, Papp E <i>et al</i>: <b>Direct detection of early-stage cancers using circulating tumor DNA</b>. <i>Sci Transl Med</i> 2017, <b>9</b>(403).</div>
-            <div>[21] Henze AT, Acker T: <b>Feedback regulators of hypoxia-inducible factors and their role in cancer biology</b>. <i>Cell Cycle</i> 2010, <b>9</b>(14):2749-2763.</div>
-            <div>[22] Cowman SJ, Fuja DG, Liu X-D, Tidwell RSS, Kandula N, Sirohi D, Agarwal AM, Emerson LL, Tripp SR, Mohlman JS <i>et al</i>: <b>Macrophage HIF-1&alpha; Is an Independent Prognostic Indicator in Kidney Cancer</b>. <i>Clin Cancer Res</i> 2020, <b>26</b>(18):4970-4982.</div>
-            <div>[23] Reustle A, Di Marco M, Meyerhoff C, Nelde A, Walz JS, Winter S, Kandabarau S, Buttner F, Haag M, Backert L <i>et al</i>: <b>Integrative -omics and HLA-ligandomics analysis to identify novel drug targets for ccRCC immunotherapy</b>. <i>Genome Med</i> 2020, <b>12</b>(1):32.</div>
-            <div>[24] Schaeffeler E, Buttner F, Reustle A, Klumpp V, Winter S, Rausch S, Fisel P, Hennenlotter J, Kruck S, Stenzl A <i>et al</i>: <b>Metabolic and Lipidomic Reprogramming in Renal Cell Carcinoma Subtypes Reflects Regions of Tumor Origin</b>. <i>Eur Urol Focus</i> 2019, <b>5</b>(4):608-618.</div>
-            <div>[25] He B, Xu T, Pan B, Pan Y, Wang X, Dong J, Sun H, Xu X, Liu X, Wang S: <b>Polymorphisms of TGFBR1, TLR4 are associated with prognosis of gastric cancer in a Chinese population</b>. <i>Cancer Cell Int</i> 2018, <b>18</b>:191.</div>
-            <div>[26] Takahara T, Tsuyuki T, Satou A, Wada E, Sakurai K, Ueda R, Tsuzuki T: <b>TGFB1 mRNA expression is associated with poor prognosis and specific features of inflammation in ccRCC</b>. <i>Virchows Arch</i> 2022, <b>480</b>(3):635-643.</div>
-            <div>[27] Sun S, Su D, Dong T, Wang B, Ji X, Chu L, Lu S, Zhang T, Sun X, Liu Y <i>et al</i>: <b>Mitochondrial ribosomal protein L12 mediates metabolic reorganization in clear cell renal cell carcinoma by regulating mitochondrial biosynthesis</b>. <i>Cell Commun Signal</i> 2025, <b>23</b>(1):435.</div>
-            <div>[28] Wu P, Geng B, Chen Q, Zhao E, Liu J, Sun C, Zha C, Shao Y, You B, Zhang W <i>et al</i>: <b>Tumor Cell-Derived TGFbeta1 Attenuates Antitumor Immune Activity of T Cells via Regulation of PD-1 mRNA</b>. <i>Cancer Immunol Res</i> 2020, <b>8</b>(12):1470-1484.</div>
-            <div>[29] Chang NS: <b>Transforming growth factor-beta protection of cancer cells against tumor necrosis factor cytotoxicity is counteracted by hyaluronidase (review)</b>. <i>Int J Mol Med</i> 1998, <b>2</b>(6):653-659.</div>
-            <div>[30] Dias F, Teixeira AL, Nogueira I, Morais M, Maia J, Bodo C, Ferreira M, Vieira I, Silva J, Lobo J <i>et al</i>: <b>Plasma Extracellular Vesicle-Derived TIMP-1 mRNA as a Prognostic Biomarker in Clear Cell Renal Cell Carcinoma: A Pilot Study</b>. <i>Int J Mol Sci</i> 2020, <b>21</b>(13).</div>
-            <div>[31] Dias F, Teixeira AL, Nogueira I, Morais M, Maia J, Bodo C, Ferreira M, Vieira I, Silva J, Lobo J <i>et al</i>: <b>Plasma Extracellular Vesicle-Derived TIMP-1 mRNA as a Prognostic Biomarker in Clear Cell Renal Cell Carcinoma: A Pilot Study</b>. <i>Int J Mol Sci</i> 2020, <b>21</b>(13).</div>
-            <div>[32] Shang L, Liu HJ, Hao JJ, Jiang YY, Shi F, Zhang Y, Cai Y, Xu X, Jia XM, Zhan QM <i>et al</i>: <b>A panel of overexpressed proteins for prognosis in esophageal squamous cell carcinoma</b>. <i>PLoS One</i> 2014, <b>9</b>(10):e111045.</div>
-            <div>[33] Thomas DD, Heinecke JL, Ridnour LA, Cheng RY, Kesarwala AH, Switzer CH, McVicar DW, Roberts DD, Glynn S, Fukuto JM <i>et al</i>: <b>Signaling and stress: The redox landscape in NOS2 biology</b>. <i>Free Radic Biol Med</i> 2015, <b>87</b>:204-225.</div>
-            <div>[34] Chen J, Gu Y, Lin F, Yang H, Zhu W, Ma J, Lin S: <b>Endothelin receptor antagonist combined with a calcium channel blocker attenuates renal injury in spontaneous hypertensive rats with diabetes</b>. <i>Chin Med J (Engl)</i> 2002, <b>115</b>(7):972-978.</div>
-            <div>[35] Tzanidis A, Lim S, Hannan RD, See F, Ugoni AM, Krum H: <b>Combined angiotensin and endothelin receptor blockade attenuates adverse cardiac remodeling post-myocardial infarction in the rat: possible role of transforming growth factor beta(1)</b>. <i>J Mol Cell Cardiol</i> 2001, <b>33</b>(5):969-981.</div>
-            <div>[36] Soldano S, Pizzorni C, Paolino S, Trombetta AC, Montagna P, Brizzolara R, Ruaro B, Sulli A, Cutolo M: <b>Alternatively Activated (M2) Macrophage Phenotype Is Inducible by Endothelin-1 in Cultured Human Macrophages</b>. <i>PLoS One</i> 2016, <b>11</b>(11):e0166433.</div>
-            <div>[37] Caputo I, Caroccia B, Frasson I, Poggio E, Zamberlan S, Morpurgo M, Seccia TM, Cali T, Brini M, Richter SN <i>et al</i>: <b>Angiotensin II Promotes SARS-CoV-2 Infection via Upregulation of ACE2 in Human Bronchial Cells</b>. <i>Int J Mol Sci</i> 2022, <b>23</b>(9).</div>
-            <div>[38] Gross O, Beirowski B, Koepke ML, Kuck J, Reiner M, Addicks K, Smyth N, Schulze-Lohoff E, Weber M: <b>Preemptive ramipril therapy delays renal failure and reduces renal fibrosis in COL4A3-knockout mice with Alport syndrome</b>. <i>Kidney Int</i> 2003, <b>63</b>(2):438-446.</div>
-            <div>[39] Gohil VM, Offner N, Walker JA, Sheth SA, Fossale E, Gusella JF, MacDonald ME, Neri C, Mootha VK: <b>Meclizine is neuroprotective in models of Huntington's disease</b>. <i>Hum Mol Genet</i> 2011, <b>20</b>(2):294-300.</div>
-            <div>[40] Hosohata K, Quock RM, Hosohata Y, Burkey TH, Makriyannis A, Consroe P, Roeske WR, Yamamura HI: <b>AM630 is a competitive cannabinoid receptor antagonist in the guinea pig brain</b>. <i>Life Sci</i> 1997, <b>61</b>(9):PL115-118.</div>
+            {refs_html}
         </div>
     </div>
-    <div class="page-footer">https://medbam.org<span class="page-num">11</span></div>
-</div>
+{footer(10)}
+</div>'''
+
+
+# ============================================================
+# ASSEMBLE
+# ============================================================
+def build_html():
+    pages = [page1(), page2(), page3(), page4(), page5(), page6(), page7(), page8(), page9(), page10()]
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identification of TGFB1 and TIMP1 as the Biomarkers of Clear Cell Renal Cell Carcinoma by Bioinformatic Methods</title>
+    <style>{CSS}    </style>
+</head>
+<body>
+{"".join(pages)}
 </body>
-</html>
+</html>'''
+    return html
+
+
+if __name__ == "__main__":
+    html = build_html()
+    
+    out1 = os.path.join(OUTPUT_DIR, "双栏分页-TGFB1-TIMP1-ccRCC-Biomarkers.html")
+    out2 = os.path.join(OUTPUT_DIR, "two-column.html")
+    
+    for path in [out1, out2]:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+    
+    print(f"Generated {len(html):,} bytes")
+    print(f"  → {out1}")
+    print(f"  → {out2}")
