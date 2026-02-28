@@ -41,7 +41,7 @@ def page1():
                     <p style="margin:0 0 3mm 0;text-indent:0;text-align:left;"><span style="font-weight:bold;display:block;margin-bottom:1mm;">Correspondence</span>Hongjian Zhang, MD, Zhongshan Hospital of Xiamen University, Xiamen, 361000, China.<br>Email: zhanghongjian11021@163.com</p>
                     <p style="margin:0 0 3mm 0;text-indent:0;text-align:left;"><span style="font-weight:bold;display:block;margin-bottom:1mm;">Funding information</span>This study was supported by the Xiamen Medical and Health Guidance Project, China (Grant NO. 3502Z20254ZD1124).</p>
                 </div>
-                <div id="abstract-box" style="width:70%;padding:4mm;position:relative;background-color:#f8f9fa;">
+                <div id="abstract-box" style="width:70%;padding:4mm;position:relative;background-color:#e8e9eb;">
                     <div style="font-size:10pt;font-weight:bold;font-variant:small-caps;letter-spacing:0.05em;margin-bottom:3mm;color:#000;">Abstract</div>
                     <div id="abstract-body" style="font-size:9pt;line-height:1.3;">
                         <p style="margin:0 0 3mm 0;text-indent:0;text-align:justify;">Clear cell renal cell carcinoma (ccRCC) is the most common histological subtype of kidney cancer and is associated with high mortality and poor prognosis. In this study, we aimed to identify potential biomarkers and therapeutic candidates for ccRCC through integrated bioinformatic analyses and molecular docking. Microarray datasets from the Gene Expression Omnibus (GEO) database were analyzed to identify differentially expressed genes (DEGs), followed by validation using The Cancer Genome Atlas (TCGA) database. A total of 608 overlapping DEGs, including 267 upregulated and 341 downregulated genes, were identified across the GSE11024, GSE16441, and GSE36895 datasets. Among these, TGFB1 and TIMP1 were identified as key genes closely associated with ccRCC progression. TCGA analyses further confirmed that TGFB1 and TIMP1 expression levels were significantly correlated with ccRCC occurrence and progression and exhibited high expression specificity. In addition, potential therapeutic compounds targeting TGFB1 and TIMP1 were screened, and molecular docking analyses demonstrated that Bosentan and Ramipril formed stable hydrogen bonds with TGFB1, while Meclizine and AM-630 showed favorable binding interactions with TIMP1. These findings suggest that TGFB1 and TIMP1 may serve as promising biomarkers and therapeutic targets for ccRCC, providing new insights into its diagnosis and targeted treatment.</p>
@@ -66,7 +66,7 @@ def page2():
     return f'''
 <div class="page">
 {header()}
-    <div class="page-content two-column" style="line-height:2.4;">
+    <div class="page-content two-column" style="line-height:1.95;">
         <h1 class="section-title">2 MATERIALS AND METHODS</h1>
         <h2 class="subsection-title">2.1 Microarray data collection and identification of shared DEGs</h2>
         <p class="no-indent">The microarray datasets GSE11024, GSE16441, and GSE36895 were downloaded from the GEO database (https://www.ncbi.nlm.nih.gov/geo/). The corresponding platforms were GPL6671 (Affymetrix GeneChip Human Genome U133 Plus 2.0 Array) for GSE11024, GPL6480 (Agilent-014850 Whole Human Genome Microarray 4&times;44K G4112F) for GSE16441, and GPL570 (Affymetrix Human Genome U133 Plus 2.0 Array) for GSE36895. Differentially expressed genes (DEGs) between ccRCC tissues and normal renal tissues were identified using the GEO2R online analysis tool, which is based on the R programming language. The screening criteria were set as |log&#x2082; fold change (FC)| &gt; 1 and adjusted <em>P</em>-values &lt; 0.05 [7]. The R software (version 4.2.0) and the <em>ggplot2</em> package were used to generate volcano plots for visualization of the DEGs. Subsequently, overlapping DEGs among the three datasets were identified using a Venn diagram analysis.</p>
@@ -92,10 +92,10 @@ def page3():
     return f'''
 <div class="page">
 {header()}
-    <div class="page-content two-column" style="line-height:2.8;">
+    <div class="page-content two-column" style="line-height:1.95;">
         <h1 class="section-title">3 RESULTS</h1>
         <div class="table-wrapper" id="tbl-1">
-            <div class="table-caption"><span class="tbl-label">Table 1.</span> A Summary of Microarray Datasets from Gene Expression Omnibus (GEO) database.</div>
+            <div class="table-caption"><span class="tbl-label">Table 1</span> A Summary of Microarray Datasets from Gene Expression Omnibus (GEO) database.</div>
             <table>
                 <thead><tr><th>Series</th><th>Platform</th><th>GeneChip</th><th style="text-align:center;">Samples</th></tr></thead>
                 <tbody>
@@ -150,7 +150,7 @@ def page6():
     return f'''
 <div class="page">
 {header()}
-    <div class="page-content two-column" style="line-height:2.8;">
+    <div class="page-content two-column" style="line-height:1.95;">
         {side_by_side(5, FIG_CAP[5], 6, FIG_CAP[6])}
         <p class="no-indent">To evaluate the expression specificity of TGFB1 and TIMP1 in ccRCC, receiver operating characteristic (ROC) curves were constructed based on 532 ccRCC samples and 72 normal samples from the TCGA database. The area under the curve (AUC) was 0.883 for TGFB1 (Figure 8A) and 0.871 for TIMP1 (Figure 8B), indicating that both genes are specifically enriched in ccRCC and may serve as potential diagnostic biomarkers.</p>
     </div>
@@ -163,9 +163,15 @@ def page7():
     return f'''
 <div class="page">
 {header()}
-    <div class="page-content two-column" style="line-height:1.9;">
-        {fig(7, FIG_CAP[7])}
-        {fig(8, FIG_CAP[8])}
+    <div class="page-content two-column" style="line-height:1.6;">
+        <figure style="margin:2mm 0;">
+                <img src="{IMG_BASE}/Figure 7.jpg" alt="Figure 7">
+                <figcaption><span class="fig-label">Figure 7</span> {FIG_CAP[7]}</figcaption>
+        </figure>
+        <figure style="margin:2mm 0;">
+                <img src="{IMG_BASE}/Figure 8.jpg" alt="Figure 8">
+                <figcaption><span class="fig-label">Figure 8</span> {FIG_CAP[8]}</figcaption>
+        </figure>
         <p class="no-indent">Pearson correlation analysis (|R| &gt; 0.5, <em>P</em> &lt; 0.05) was then performed to identify genes co-expressed with TGFB1 and TIMP1 in the TCGA dataset. Subsequent GO and KEGG enrichment analyses were conducted based on these correlated genes. For TGFB1, the biological processes were primarily related to epithelial-to-mesenchymal transition (Figure 9A), the molecular functions involved protein binding (Figure 9C), and the cellular components and signaling pathways were mainly associated with focal adhesion (Figure 9B, 9D).</p>
         <p>For TIMP1, the associated biological processes included collagen fibril organization, extracellular matrix organization, and skeletal system development (Figure 9E). The cellular components were enriched in extracellular matrix, extracellular space, and extracellular region (Figure 9F). Molecular functions included extracellular matrix structural constituent, extracellular matrix structural constituent conferring tensile strength, and collagen binding (Figure 9G). KEGG pathway analysis revealed that TIMP1-associated signaling pathways involved protein digestion and absorption, ECM&ndash;receptor interaction, and focal adhesion (Figure 9H). These results suggest that TGFB1 and TIMP1 may contribute to ccRCC progression through extracellular matrix remodeling and focal adhesion-related pathways.</p>
     </div>
@@ -192,9 +198,9 @@ def page9():
     return f'''
 <div class="page">
 {header()}
-    <div class="page-content two-column" style="line-height:2.3;">
+    <div class="page-content two-column" style="line-height:1.95;">
         <div class="table-wrapper" id="tbl-2">
-            <div class="table-caption"><span class="tbl-label">Table 2.</span> The significant drugs related to TGFB1 and TIMP1.</div>
+            <div class="table-caption"><span class="tbl-label">Table 2</span> The significant drugs related to TGFB1 and TIMP1.</div>
             <table>
                 <thead><tr><th>Drugs</th><th>CTD ID</th><th style="text-align:center;"><em>P</em>-value</th><th style="text-align:center;">Combined Score</th><th>Genes</th></tr></thead>
                 <tbody>

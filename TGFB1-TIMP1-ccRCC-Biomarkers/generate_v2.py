@@ -124,7 +124,7 @@ def fig(n, caption, ident=None):
     id_attr = f' id="fig-{n}"' if ident else ""
     return f'''<figure{id_attr}>
                 <img src="{IMG_BASE}/Figure {n}.jpg" alt="Figure {n}">
-                <figcaption><span class="fig-label">Figure {n}.</span> {caption}</figcaption>
+                <figcaption><span class="fig-label">Figure {n}</span> {caption}</figcaption>
             </figure>'''
 
 def side_by_side(n1, cap1, n2, cap2):
@@ -132,11 +132,11 @@ def side_by_side(n1, cap1, n2, cap2):
     return f'''<div class="side-by-side-figures">
             <figure id="fig-{n1}">
                 <img src="{IMG_BASE}/Figure {n1}.jpg" alt="Figure {n1}">
-                <figcaption><span class="fig-label">Figure {n1}.</span> {cap1}</figcaption>
+                <figcaption><span class="fig-label">Figure {n1}</span> {cap1}</figcaption>
             </figure>
             <figure id="fig-{n2}">
                 <img src="{IMG_BASE}/Figure {n2}.jpg" alt="Figure {n2}">
-                <figcaption><span class="fig-label">Figure {n2}.</span> {cap2}</figcaption>
+                <figcaption><span class="fig-label">Figure {n2}</span> {cap2}</figcaption>
             </figure>
         </div>'''
 
