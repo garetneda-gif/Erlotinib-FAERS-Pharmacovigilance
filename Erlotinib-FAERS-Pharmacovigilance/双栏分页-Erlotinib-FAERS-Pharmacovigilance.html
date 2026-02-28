@@ -321,7 +321,8 @@
         }
 
         .page1-intro .intro-col.intro-left p {
-            word-spacing: 0.04em;
+            text-align-last: justify;
+            text-justify: inter-word;
         }
 
         .page1-intro .intro-col.intro-right {
@@ -455,7 +456,7 @@
 
         <p class="no-indent" style="margin-top:0;"><strong>(I) ROR method</strong></p>
         <p class="no-indent" style="text-align:center;font-size:10pt;margin:2mm 0;">ROR = ad / bc</p>
-        <p class="no-indent" style="text-align:center;font-size:9pt;margin:1mm 0;">95% CI = e<sup>ln(ROR) &plusmn; 1.96√<span style="border-top:0.8px solid #000;padding:0 1px;">(1/a + 1/b + 1/c + 1/d)</span></sup></p>
+        <p class="no-indent" style="text-align:center;margin:1mm 0;"><math style="font-size:9pt;"><mn>95</mn><mo>%</mo><mtext>&nbsp;CI&nbsp;=&nbsp;</mtext><msup><mi>e</mi><mrow><mi>ln</mi><mo>(</mo><mi>ROR</mi><mo>)</mo><mo>&plusmn;</mo><mn>1.96</mn><msqrt><mrow><mn>1</mn><mo>/</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>/</mo><mi>b</mi><mo>+</mo><mn>1</mn><mo>/</mo><mi>c</mi><mo>+</mo><mn>1</mn><mo>/</mo><mi>d</mi></mrow></msqrt></mrow></msup></math></p>
         <p class="no-indent">The criteria of positive signals: the lower limit of 95% CI &gt; 1, N &ge; 3;</p>
 
         <p class="no-indent" style="margin-top:3mm;"><strong>(II) PRR method</strong></p>
@@ -465,12 +466,12 @@
 
         <p class="no-indent" style="margin-top:3mm;"><strong>(III) BCPNN method</strong></p>
         <p class="no-indent" style="text-align:center;font-size:10pt;margin:2mm 0;">IC = log<sub>2</sub>[a(a+b+c+d) / (a+b)(a+c)]</p>
-        <p class="no-indent" style="text-align:center;font-size:9pt;margin:1mm 0;">95% CI = E(IC) &plusmn; 2 &times; √<span style="border-top:0.8px solid #000;padding:0 1px;">V(IC)</span></p>
+        <p class="no-indent" style="text-align:center;margin:1mm 0;"><math style="font-size:9pt;"><mn>95</mn><mo>%</mo><mtext>&nbsp;CI&nbsp;=&nbsp;</mtext><mi>E</mi><mo>(</mo><mi>IC</mi><mo>)</mo><mo>&plusmn;</mo><mn>2</mn><mo>&times;</mo><msqrt><mrow><mi>V</mi><mo>(</mo><mi>IC</mi><mo>)</mo></mrow></msqrt></math></p>
         <p class="no-indent">The criteria of positive signals: IC025 &gt; 0 (IC025: the lower bound of 95% CI);</p>
 
         <p class="no-indent" style="margin-top:3mm;"><strong>(IV) EBGM method</strong></p>
         <p class="no-indent" style="text-align:center;font-size:10pt;margin:2mm 0;">EBGM = a(a+b+c+d) / (a+c)(a+b)</p>
-        <p class="no-indent" style="text-align:center;font-size:9pt;margin:1mm 0;">95% CI = e<sup>ln(EBGM) &plusmn; 1.96√<span style="border-top:0.8px solid #000;padding:0 1px;">(1/a + 1/b + 1/c + 1/d)</span></sup></p>
+        <p class="no-indent" style="text-align:center;margin:1mm 0;"><math style="font-size:9pt;"><mn>95</mn><mo>%</mo><mtext>&nbsp;CI&nbsp;=&nbsp;</mtext><msup><mi>e</mi><mrow><mi>ln</mi><mo>(</mo><mi>EBGM</mi><mo>)</mo><mo>&plusmn;</mo><mn>1.96</mn><msqrt><mrow><mn>1</mn><mo>/</mo><mi>a</mi><mo>+</mo><mn>1</mn><mo>/</mo><mi>b</mi><mo>+</mo><mn>1</mn><mo>/</mo><mi>c</mi><mo>+</mo><mn>1</mn><mo>/</mo><mi>d</mi></mrow></msqrt></mrow></msup></math></p>
         <p class="no-indent">The criteria of positive signals: EBGM05 &gt; 2 (EBGM05: the lower bound of 95% CI).</p>
 
         <p style="margin-top:3mm;">The effective and favorable ADR results must concurrently satisfy the screening criteria outlined by the aforementioned four methods. All data processing and statistical analyses related to Erlotinib have been conducted utilizing SAS, Navicat for MySQL, WPS Excel, and R software.</p>
@@ -525,7 +526,7 @@
             <div style="font-size:7.5pt;margin-top:1.5mm;line-height:1.25;">* The asterisk (*) indicates categories beyond the biological sexes of male and female, including other self-defined genders or unspecified/unknown gender entries.</div>
         </div>
 
-        <h2 class="subsection-title">3.2 Signals Detection Associated with Erlotinib at the SOC Level</h2>
+        <h2 class="subsection-title" style="margin-top:10.3mm;">3.2 Signals Detection Associated with Erlotinib at the SOC Level</h2>
         <p class="no-indent">As illustrated in Table 3, the three most prevalent adverse events at the System Organ Class (SOC) level include general disorders and administration site conditions (case reports: 13,114; ROR=16.46; PRR=8.94; IC025=3.06; EBGM05=8.53), skin and subcutaneous tissue disorders (case reports: 6,839; ROR=11.41; PRR=8.77; IC025=3.01; EBGM05=8.34), and gastrointestinal disorders (case reports: 3,205; ROR=4.78; PRR=4.33; IC025=1.98; EBGM05=4.14). A further analysis of signal strength indicates that the leading three SOC categories of adverse events are congenital, familial, and genetic disorders (ROR=82.3), reproductive system and breast disorders (ROR=24.23), and nervous system disorders (ROR=11.49), all of which are also referenced in the erlotinib manual.</p>
         <p>Additionally, there are SOC terms not included in the erlotinib label, such as cardiac disorders (case reports: 177; ROR=5.83; PRR=5.8; IC025=2.02; EBGM05=4.93), vascular disorders (case reports: 138; ROR=4.71; PRR=4.69; IC025=1.66; EBGM05=3.92), surgical and medical procedures (case reports: 38; ROR=3.97; PRR=3.96; IC025=0.94; EBGM05=2.85), reproductive system and breast disorders (case reports: 20; ROR=24.23; PRR=24.21; IC025=3.07; EBGM05=14.42), and injury, poisoning, and procedural complications (case reports: 16; ROR=9.18; PRR=9.17; IC025=1.61; EBGM05=5.45).</p>
         <h2 class="subsection-title">3.3 Signals Detection Associated with Erlotinib at the PT Level</h2>
